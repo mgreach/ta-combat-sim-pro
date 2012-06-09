@@ -1,5 +1,12 @@
 // TODO - Calculate the Troop Repair Time
 
+TASuite.main.prototype.degree = null;
+TASuite.main.prototype.currentDx = null;
+TASuite.main.prototype.currentDy = null;
+TASuite.main.prototype.currentUnit = null;
+TASuite.main.prototype.units = null;
+TASuite.main.prototype.units_list = null;
+
 // Set the properties here
 TASuite.main.prototype.buttonProTools = null;
 TASuite.main.prototype.buttonOptimize = null;
@@ -30,7 +37,6 @@ TASuite.main.prototype.lastVictory = null;
 TASuite.main.prototype.saved_units = null;
 TASuite.main.prototype.optimizing = null;
 TASuite.main.prototype.ajaxImage = null;
-TASuite.main.prototype.timerOn = null;
 
 TASuite.main.prototype.enemyTroopStrengthLabel = null;
 TASuite.main.prototype.enemyBuildingsStrengthLabel = null;
@@ -199,7 +205,7 @@ TASuite.main.prototype.initializePro = function() {
 	// Primary selector
 	var hBox4 = new qx.ui.container.Composite();
   hBox4.setLayout(new qx.ui.layout.HBox(5));
-  hBox4.add(new qx.ui.basic.Label("Priority: "));
+  hBox4.add(new qx.ui.basic.Label("1st: "));
 	this.primarySelect = new qx.ui.form.SelectBox();
 	var primarySelectDefault = new qx.ui.form.ListItem("C. Yard", null, "CY");
 	this.primarySelect.add(primarySelectDefault);
@@ -212,7 +218,7 @@ TASuite.main.prototype.initializePro = function() {
 	// Secondary selector
 	var hBox5 = new qx.ui.container.Composite();
   hBox5.setLayout(new qx.ui.layout.HBox(5));
-  hBox5.add(new qx.ui.basic.Label("Secondary: "));
+  hBox5.add(new qx.ui.basic.Label("2nd: "));
 	this.secondarySelect = new qx.ui.form.SelectBox();
 	this.secondarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
 	var secondarySelectDefault = new qx.ui.form.ListItem("Troop Strength", null, "TS");
@@ -261,13 +267,17 @@ TASuite.main.prototype.getCityPreArmyUnits = function() {
   }
   return units;
 }
-
+TASuite.main.prototype.closeProBox = function() {
+	var units = this.getCityPreArmyUnits();
+	units.remove_ArmyChanged(this.add_ArmyChanged);
+	ClientLib.Vis.VisMain.GetInstance().remove_ViewModeChange(this.add_ViewModeChange);
+	this.battleResultsBox.close();
+};
 TASuite.main.prototype.togglePro = function() {
 	var units = this.getCityPreArmyUnits();
+	this.units = units.m_ArmyUnits.l;
 	if (this.battleResultsBox.isVisible()) {
-		units.remove_ArmyChanged(this.add_ArmyChanged);
-		ClientLib.Vis.VisMain.GetInstance().remove_ViewModeChange(this.add_ViewModeChange);
-		this.battleResultsBox.close();
+		this.closeProBox();
 	}
 	else {
 		// Add the event listener for armybar
@@ -278,7 +288,6 @@ TASuite.main.prototype.togglePro = function() {
     catch (e) {
     	console.log(e);
     }
-		
 		this.updateProWindow();
 		this.battleResultsBox.moveTo(115, 200);
 	  this.battleResultsBox.setHeight(400);
@@ -302,22 +311,16 @@ TASuite.main.prototype.optimizeLayout = function() {
   		this.ajaxImage.setVisibility("visible");
   		this.optimizing = true;
   		// Set the current primary and secondary targets
-  		this.calculateSimResults();
+  		this.updateProWindow();
   		this.setTargets();
-  		var degreeMax = parseInt(this.degreeSelect.getSelection()[0].getModel());
-  		var progressive = true;
-  		for (var i = degreeMax; i >= 0; i--) {
-  			if (this.checkBetterFormation(units, i, progressive)) {
-  				break;
-  			}
-  		}
+  		this.degree = parseInt(this.degreeSelect.getSelection()[0].getModel());
+  		
+  		this.checkBetterFormation();
   	}
   }
   catch(e) {
   	console.log(e);
   }
-  	
-  this.updateProWindow();
 };
 TASuite.main.prototype.optimizingDone = function() {
 	this.buttonOptimize.setLabel("Optimize");
@@ -325,7 +328,6 @@ TASuite.main.prototype.optimizingDone = function() {
 	this.battleResultsBox.setModal(false);
 	this.optimizing = false;
 	this.ajaxImage.setVisibility("none");
-	this.timerOn = false;
 };
 TASuite.main.prototype.updateFormation = function() {
 	var units = this.getCityPreArmyUnits();
@@ -333,12 +335,11 @@ TASuite.main.prototype.updateFormation = function() {
 	units.UpdateArmyLayout$0();
 	units.RefreshData$0();
 };
-TASuite.main.prototype.checkBetterFormation = function(units, degree, progressive) {
-	this.calculateSimResults();
-	this.saveFormation(units.m_ArmyUnits.l);
+TASuite.main.prototype.checkBetterFormation = function() {
+	this.saveFormation();
 	
 	var order = [];
-	for (var i = 0; i < units.m_ArmyUnits.l.length; i++){
+	for (var i = 0; i < this.units.length; i++){
 	  order.push(i);
 	}
 	
@@ -352,75 +353,100 @@ TASuite.main.prototype.checkBetterFormation = function(units, degree, progressiv
     order[top] = tmp;
   }
   
-  var i = 0;
-  var _this = this;
-  
-  function nudgeUnit(context) {
-  	_this.timerOn = false;
-  	if (i < (order.length - 1)) {
-  		i++;
-      var unit = units.m_ArmyUnits.l[order[i]];
-  		var x = unit.get_CoordX();
-  		var y = unit.get_CoordY();
-  		
-  		// TODO - Try breaking this up into multiple setTimeout() functions so that it won't be as laggy...
-			loop1:
-			for (var dx = degree; dx >= -degree; dx--) {
-				for (var dy = degree; dy >= -degree; dy--) {
-					if (!_this.optimizing) {
-						break loop1;
-					}
-					// First check if this move is legal
-					new_x = dx + x;
-					new_y = dy + y;
-					if (dy == 0 && dx == 0) {
-						// Do nothing
-					}
-					else {
-  					if (new_x >= 0 && new_x < 8) {
-  						if (new_y >= 0 && new_y < 4) {
-  							// Move the unit
-  							//console.log("Moving the unit x: " + dx.toString() + " y: " + dy.toString());
-  							// TODO - First, check if the unit is a different type or level
-  							/*
-  							var other_unit = units.GetUnitByCoord(new_x,new_y);
-  							console.log(other_unit);
-  							console.log(unit);
-  							console.log(units);
-  							*/
-  							if (true) {
-	  							unit.MoveBattleUnit(new_x, new_y);
-	  							if (_this.checkNewResults(units, unit)) {
-				    				_this.updateFormation();
-				    				break loop1;
-				    			}
-				    			else if (progressive) unit.MoveBattleUnit(x, y);
-				    		}
-  						}
-  					}
-					}
-				}
-			}
-  		
-  		if (_this.optimizing) {
-  			if (!_this.timerOn) {
-  				_this.timerOn = true;
-  				setTimeout(nudgeUnit, 200);
-  			}
-  		}
-    }
-    else {
-    	_this.optimizingDone();
-    	_this.updateFormation();
-    }
-  }
-  
-  this.timerOn = true;
-  setTimeout(nudgeUnit, 0);
+  this.units_list = order;
+	this.currentUnit = this.units[this.units_list.pop()];
+	this.currentDx = this.degree;
+	this.currentDy = this.degree;
+	setTimeout(this.moveLoop, 1000);
 	
 	return false;
 };
+TASuite.main.prototype.moveLoop = function() {
+	console.log("Start of moveLoop");
+	ta = window.TASuite.main.getInstance();
+	if (!ta.optimizing) {
+		console.log("No longer optimizing.");
+		return;
+	}
+	// First check if this move is legal
+	var unit = ta.currentUnit;
+	var x = unit.get_CoordX();
+  var y = unit.get_CoordY();
+	var degree = ta.degree;
+	var dx = ta.currentDx;
+	var dy = ta.currentDy;
+	dx -= 1;
+	
+	new_x = dx + x;
+	new_y = dy + y;
+	if (dy == 0 && dx == 0) {
+		dx -= 1;
+	}
+	else {
+		if (new_x >= 0 && new_x < 8) {
+			if (new_y >= 0 && new_y < 4) {
+				// Move the unit
+				console.log("Moving the unit x: " + dx.toString() + " y: " + dy.toString());
+				// TODO - First, check if the unit is a different type or level
+				/*
+				var other_unit = units.GetUnitByCoord(new_x,new_y);
+				console.log(other_unit);
+				console.log(unit);
+				console.log(units);
+				*/
+				if (true) {
+					unit.MoveBattleUnit(new_x, new_y);
+					if (ta.checkNewResults()) {
+    				ta.updateFormation();
+    				ta.nextUnit();
+    				return;
+    			}
+    			else unit.MoveBattleUnit(x, y);
+    		}
+			}
+		}
+	}
+	
+	if (dx < -degree || dx < 0) {
+		dx = degree;
+		dy -= 1;
+		if (dy < -degree || dy < 0) {
+			ta.nextUnit();
+			return;
+		}
+	}
+	
+	// If we are still on this unit, then set the dx and dy and schedule another iteration
+	ta.currentDx = dx;
+	ta.currentDy = dy;
+	setTimeout(ta.moveLoop, 10);
+	console.log("End of moveLoop");
+};
+TASuite.main.prototype.nextUnit = function() {
+	// Set the next unit if this isn't the last one, and start the loop again
+	if (this.units_list.length > 0) {
+		console.log("Going to next unit");
+		this.currentDx = this.degree;
+		this.currentDy = this.degree;
+		this.currentUnit = this.units[this.units_list.pop()];
+		setTimeout(this.moveLoop, 10);
+	}
+	else {
+		// Subtract the degree and start over
+		this.degree -= 1;
+		if (this.degree > 0) {
+			console.log("Moving to next degree");
+			this.checkBetterFormation();
+		}
+		else {
+			console.log("Done Optimizing");
+			this.optimizingDone();
+			this.updateFormation();
+		}
+	}
+}
 TASuite.main.prototype.setTargets = function() {
+	console.log("Setting the targets");
 	var p = this.primarySelect.getSelection()[0].getModel();
 	var s = this.secondarySelect.getSelection()[0].getModel();
 	
@@ -430,8 +456,8 @@ TASuite.main.prototype.setTargets = function() {
 	this.currentPrimary = this.lastPrimary;
 	this.currentSecondary = this.lastSecondary;
 };
-TASuite.main.prototype.getTarget = function(v) {
-	switch (v) {
+TASuite.main.prototype.getTarget = function(key) {
+	switch (key) {
 		case 'DF':
 			return this.lastDFPercentage;
 		case 'CY':
@@ -466,32 +492,33 @@ TASuite.main.prototype.compareTargets = function() {
 	this.lastSecondary = this.getTarget(s);
 	// Check if the primary is higher, if so, return true
 	if ((this.lastPrimary * np) > (this.currentPrimary * np)) {
-		//console.log("Primary " + (this.lastPrimary * np).toString() + " is better than " + (this.currentPrimary * np).toString());
+		console.log("Primary " + (this.lastPrimary * np).toString() + " is better than " + (this.currentPrimary * np).toString());
 		return true;
 	}
 	else {
-		//console.log("Primary " + (this.lastPrimary * np).toString() + " is worse than " + (this.currentPrimary * np).toString());
+		console.log("Primary " + (this.lastPrimary * np).toString() + " is worse than " + (this.currentPrimary * np).toString());
 		// Check if the primary is equal, if so, check the secondary
 		if ((this.lastPrimary * np) == (this.currentPrimary * np)) {
 			if ((this.lastSecondary * ns) > (this.currentSecondary * ns)) {
 				// TODO - Figure out a better ratio, such as 1/2 the power of primary
-				//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
+				console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
 				return true;
 			}
 			else {
-				//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is worse than " + (this.currentSecondary * ns).toString());
+				console.log("Secondary " + (this.lastSecondary * ns).toString() + " is worse than " + (this.currentSecondary * ns).toString());
 				return false;
 			}
 		}
 		return false;
 	}
 };
-TASuite.main.prototype.checkNewResults = function(units, unit) {
+TASuite.main.prototype.checkNewResults = function() {
 	this.calculateSimResults();
 	
 	if (this.compareTargets()) {
-		this.saveFormation(units.m_ArmyUnits.l);
+		this.saveFormation();
 		this.setTargets();
+		this.updateProWindow();
 		return true;
 	}
 	
@@ -505,10 +532,10 @@ TASuite.main.prototype.restoreFormation = function(units) {
 		units[i].m_UnitId = saved_unit.id;
 	}
 };
-TASuite.main.prototype.saveFormation = function(units) {
+TASuite.main.prototype.saveFormation = function() {
 	this.saved_units = [];
-	for (var i = 0; (i < units.length); i++) {
-		var unit = units[i];
+	for (var i = 0; (i < this.units.length); i++) {
+		var unit = this.units[i];
 		var armyUnit = {};
 		armyUnit.x = unit.m_CoordX;
 		armyUnit.y = unit.m_CoordY;
@@ -517,6 +544,7 @@ TASuite.main.prototype.saveFormation = function(units) {
 	}
 };
 TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
+	console.log("Calculating Troop Strengths");
 	var total_hp = 0;
   var end_hp = 0;
   var e_total_hp = 0;
@@ -597,10 +625,12 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
 };
 TASuite.main.prototype.onViewChange = function(oldMode, newMode) {
 	// Close the pro window
-	window.TASuite.main.getInstance().battleResultsBox.close();
+	window.TASuite.main.getInstance().closeProBox();
 };
 TASuite.main.prototype.onUnitMoved = function(sender, e) {
-	window.TASuite.main.getInstance().updateProWindow();
+	if (!this.optimizing) {
+		window.TASuite.main.getInstance().updateProWindow();
+	}
 };
 TASuite.main.prototype.onDamageDone = function(sender, e) {
 	// Try to update the Troop Strength meter
