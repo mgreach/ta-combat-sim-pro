@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.1.2
+// @version        1.1.3a
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -22,7 +22,10 @@
           buttonCheckPro: null,
           troopDamageLabel: null,
           battleResultsBox: null,
+          add_ViewModeChange: null,
+          active_modules: null,
           initialize: function() {
+          	this.add_ViewModeChange = (new ClientLib.Vis.ViewModeChange).$ctor(this, this.onViewChange);
             this.buttonSimulateCombat = new qx.ui.form.Button("Simulate");
             this.buttonSimulateCombat.set({width: 80, appearance: "button-text-small", toolTipText: "Start Combat Simulation"});
             this.buttonSimulateCombat.addListener("click", this.startSimulation, this);
@@ -48,9 +51,49 @@
 						  blockerColor: '#000000',
 						  blockerOpacity: 0.6
 						});
+						
+						// The Help Vertical Box
+					  var pVBox = new qx.ui.container.Composite()
+					  pVBox.setLayout(new qx.ui.layout.VBox(5));
+					  pVBox.setThemedFont("bold");
+						pVBox.setThemedPadding(2);
+						pVBox.setThemedBackgroundColor("#eef");
+						this.battleResultsBox.add(pVBox);
+						var proHelpBar = new qx.ui.basic.Label().set({
+					    value: "<a target='_blank' href='http://www.youtube.com/watch?v=TcgryVL9jnk'>Pro</a> | <a target='_blank' href='http://www.moneyscripts.net/ta/faq'>FAQ</a> | <a target='_blank' href='http://userscripts.org/scripts/discuss/130344'>Forums</a>",
+					    rich : true
+					  });
+					  pVBox.add(proHelpBar);
 					  
 					  _this = this;
 					  setTimeout(function() {
+					  	try {
+						  	// Get the active modules
+								// Doing this the hard and unreliable way for now, until we figure out a better way
+								_this.active_modules = {};
+								var g = ClientLib.Res.ResMain.GetInstance$10();
+								var player = ClientLib.Data.MainData.GetInstance$9().get_Player$2();
+								_this.active_modules.l = [];
+								for (var i in g.m_Gamedata.units) {
+									var ug = g.GetUnit$0(i);
+									var research = player.m_PlayerResearch.GetResearchItemFomMdbId(ug.tl);
+									var modules = ug.m;
+									for (var j in modules) {
+									  var module = modules[j];
+									  if (module.t == 1) {
+									    _this.active_modules.l.push(module.i);
+									  }
+									  if (research && module.t == 3 && research.m_Level == 2) {
+									    _this.active_modules.l.push(module.i);
+									  }
+									}
+								}
+							}
+							catch(e) {
+								console.log(e);
+							}
+					  	
+					  	ClientLib.Vis.VisMain.GetInstance().add_ViewModeChange(_this.add_ViewModeChange);
 					  	// Add a refresh button for the user to manually check for pro. Should only need to do it one time at max
 					  	_this.buttonCheckPro = new qx.ui.form.Button("Refresh Pro");
 						  _this.buttonCheckPro.set({appearance: "button-text-small", toolTipText: "Try to load pro."});
@@ -60,13 +103,13 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pro/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pro2/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }, _this);
 						  _this.battleResultsBox.add(_this.buttonCheckPro);
 					  	
 					  	var proDonateText = new qx.ui.basic.Label().set({
-						    value: "Battle Simulator Pro is only available to supporters of the project. To become a supporter, simply donate $1 or more by clicking the button below. If the donation is for less than $1, it won't qualify for the pro access. To see what the Pro version adds, take a look at this short video: <a style='color: #efefef;' target='_blank' href='http://www.youtube.com/watch?v=xVQ-l7BjTco'>Pro Video</a>. You will be given access to Pro immediately after the donation is received, usually within a minute or two. <a style='color: #efefef;' target='_blank' href='http://www.moneyscripts.net/ta/terms'>Terms & Conditions</a>",
+						    value: "Battle Simulator Pro is only available to supporters of the project. To become a supporter, simply donate $1 or more by clicking the button below. If the donation is for less than $1, it won't qualify for the pro access. To see what the Pro version adds, take a look at this short video: <a style='color: #efefef;' target='_blank' href='http://www.youtube.com/watch?v=TcgryVL9jnk'>Pro Video</a>. You will be given access to Pro immediately after the donation is received, usually within a minute or two. <a style='color: #efefef;' target='_blank' href='http://www.moneyscripts.net/ta/terms'>Terms & Conditions</a>",
 						    rich : true,
 						    width: 180,
 						    textAlign: 'justify'
@@ -87,7 +130,7 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pro/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pro2/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }
 					  }, 5000);
@@ -109,6 +152,28 @@
 						this.buttonUnlockAttack.set({width: 60, height: 45, appearance: "button-text-small", toolTipText: "Unlock"});
 						this.buttonUnlockAttack.addListener("click", this.unlockAttacks, this);
 						armyBar.add(this.buttonUnlockAttack, {top: 81, right: 0});
+          },
+          closeProBox: function() {
+						this.battleResultsBox.close();
+					},
+          onViewChange: function(oldMode, newMode) {
+          	try {
+	          	if (newMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatSetupDefense) {
+	            	var current_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id();
+	          		if (localStorage.ta_sim_last_city != current_city) {
+	          			// Reset the battleground
+	          			this.bustCache();
+	          		}
+	          	}
+	          	if (oldMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatSetupDefense) {
+	          		if (newMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_PlayerDefense) {
+	          			this.closeProBox();
+	          		}
+	          	}
+          	}
+          	catch(e) {
+          		console.log(e);
+          	}
           },
 					unlockAttacks: function() {
 						var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
@@ -183,16 +248,26 @@
 	          	console.log(e);
 	          }
           },
-          setupBattleground: function() {
+          bustCache: function() {
+          	// Bust the cache
+        		try {
+	            var own_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();
+        			own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId].CopyCityOffenseUnitsLayout$0();
+        		}
+        		catch(e) {
+        			console.log(e);
+        		}
+          },
+          setupBattleground: function(offense_units) {
           	var app = qx.core.Init.getApplication();
+          	var mainData = ClientLib.Data.MainData.GetInstance();
             var vis_main = ClientLib.Vis.VisMain.GetInstance();
-            var battleground = vis_main.get_Battleground();
-            var player_cities = ClientLib.Data.MainData.GetInstance().get_Cities();
+            var player_cities = mainData.get_Cities();
             var current_city = player_cities.get_CurrentCity();
             var own_city = player_cities.get_CurrentOwnCity();
-            localStorage.ta_sim_last_city = current_city.get_Id();
+          	var battleground = vis_main.get_Battleground();
             
-            ClientLib.Data.MainData.GetInstance$9().get_Combat$1().set_Id$0(-1);
+            localStorage.ta_sim_last_city = current_city.get_Id();
             
             // First reset the battlefield
             battleground.Reset();
@@ -216,29 +291,10 @@
             battleground.AddBase(current_city);
             
 						try {
-							// Get the active modules
-							// Doing this the hard and unreliable way for now, until we figure out a better way
-							// FIXME - This doesn't work for NOD
-							var active_modules = {};
-							var g = ClientLib.Res.ResMain.GetInstance$10();
-							var player=ClientLib.Data.MainData.GetInstance$9().get_Player$2();
-							active_modules.l = [];
-							for (var i in g.m_Gamedata.units) {
-								var ug = g.GetUnit$0(i);
-								for (var j in ug.m) {
-								  var module = ug.m[j];
-								  var research = player.m_PlayerResearch.GetResearchItemFomMdbId(ug.tl);
-								  if (module.t == 1) {
-								    active_modules.l.push(module.i);
-								  }
-								  if (module.t == 3 && research.m_Level == 2) {
-								    active_modules.l.push(module.i);
-								  }
-								}
-							}
+							offense_units = offense_units || own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId];
 							
-	            battleground.AddOffense(own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId], active_modules);
-	            battleground.AddDefense(current_city.get_CityUnitsData(), active_modules);
+	            battleground.AddOffense(offense_units, this.active_modules);
+	            battleground.AddDefense(current_city.get_CityUnitsData(), this.active_modules);
             }
             catch (e) {
             	battleground.AddOffense(own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId]);
