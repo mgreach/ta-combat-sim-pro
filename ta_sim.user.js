@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.1.3a
+// @version        1.1.4.0
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -94,6 +94,7 @@
 							}
 					  	
 					  	ClientLib.Vis.VisMain.GetInstance().add_ViewModeChange(_this.add_ViewModeChange);
+					  	var pid = ClientLib.Data.MainData.GetInstance().m_Player.accountId;
 					  	// Add a refresh button for the user to manually check for pro. Should only need to do it one time at max
 					  	_this.buttonCheckPro = new qx.ui.form.Button("Refresh Pro");
 						  _this.buttonCheckPro.set({appearance: "button-text-small", toolTipText: "Try to load pro."});
@@ -103,7 +104,7 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pro2/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + pid.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }, _this);
 						  _this.battleResultsBox.add(_this.buttonCheckPro);
@@ -117,20 +118,22 @@
 						  proDonateText.setTextColor("white");
 						  _this.battleResultsBox.add(proDonateText);
 						  
-						  var paypalButton = new qx.ui.basic.Label().set({
-						    value: "<form action='https://www.paypal.com/cgi-bin/webscr' method='post'><input type='hidden' name='cmd' value='_s-xclick'><input type='hidden' name='hosted_button_id' value='DB5VHSWX3CKR4'><input type='hidden' name='custom' value='" + ClientLib.Data.MainData.GetInstance().m_Player.accountId +"'><input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif' border='0' name='submit' alt='PayPal - The safer, easier way to pay online!'><img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'></form>",
-						    rich : true,
-						    width: 180,
-						    textAlign: 'center'
-						  });
-							_this.battleResultsBox.add(paypalButton);
+						  if (pid) {
+							  var paypalButton = new qx.ui.basic.Label().set({
+							    value: "<form action='https://www.paypal.com/cgi-bin/webscr' method='post'><input type='hidden' name='cmd' value='_s-xclick'><input type='hidden' name='hosted_button_id' value='DB5VHSWX3CKR4'><input type='hidden' name='custom' value='" + pid.toString() +"'><input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif' border='0' name='submit' alt='PayPal - The safer, easier way to pay online!'><img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'></form>",
+							    rich : true,
+							    width: 180,
+							    textAlign: 'center'
+							  });
+								_this.battleResultsBox.add(paypalButton);
+							}
 					  	
 					  	// Check for the pro script if they have it for sure
 					  	if (localStorage.getItem("tasim_pro") == "true") {
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pro2/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }
 					  }, 5000);
@@ -165,14 +168,22 @@
 	          			this.bustCache();
 	          		}
 	          	}
-	          	if (oldMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatSetupDefense) {
-	          		if (newMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_PlayerDefense) {
-	          			this.closeProBox();
-	          		}
+	          	if (newMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_PlayerDefense) {
+	          		this.closeProBox();
 	          	}
           	}
           	catch(e) {
           		console.log(e);
+          		if (newMode == webfrontend.gui.PlayArea.modes.EMode_CombatSetupDefense) {
+	            	var current_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id();
+	          		if (localStorage.ta_sim_last_city != current_city) {
+	          			// Reset the battleground
+	          			this.bustCache();
+	          		}
+	          	}
+	          	if (newMode == webfrontend.gui.PlayArea.modes.EMode_PlayerDefense) {
+	          		this.closeProBox();
+	          	}
           	}
           },
 					unlockAttacks: function() {
