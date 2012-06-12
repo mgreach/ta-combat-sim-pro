@@ -632,6 +632,7 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
 	  		eb_end_hp += i_entity.m_iHitpointsCurrent;
 	  		
 	  		if (i_entity.m_MDCTypeId == 195) {
+	  			// FIXME - This only works for forgotten bases
 		  		this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
 		  	}
 		  	if (i_entity.m_MDCTypeId == 177) {

@@ -23,7 +23,8 @@
           troopDamageLabel: null,
           battleResultsBox: null,
           add_ViewModeChange: null,
-          active_modules: null,
+          attacker_modules: null,
+          defender_modules: null,
           initialize: function() {
           	this.add_ViewModeChange = (new ClientLib.Vis.ViewModeChange).$ctor(this, this.onViewChange);
             this.buttonSimulateCombat = new qx.ui.form.Button("Simulate");
@@ -69,11 +70,27 @@
 					  setTimeout(function() {
 					  	try {
 						  	// Get the active modules
+						  	
+						  	
+						  	// FIXME - Put this in a refresh button somewhere in case they need to refresh...
+						  	/*
+						  	_this.attacker_modules = {};
+								_this.defender_modules = {};
+								var report_id = 3133449;
+								ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand ("GetCombatData",{playerReportId:report_id}, (new ClientLib.Net.CommandResult).$ctor(this,function(context, result){
+								var combatData=(new ClientLib.Data.Combat).$ctor$1();
+								combatData.SetCombatData$0(result); 
+								_this.attacker_modules = combatData.m_AttackerModules;
+								_this.defender_modules = combatData.m_DefenderModules;
+								}), null);
+								*/
+						  	
 								// Doing this the hard and unreliable way for now, until we figure out a better way
-								_this.active_modules = {};
+								
+								_this.attacker_modules = {};
 								var g = ClientLib.Res.ResMain.GetInstance$10();
 								var player = ClientLib.Data.MainData.GetInstance$9().get_Player$2();
-								_this.active_modules.l = [];
+								_this.attacker_modules.l = [];
 								for (var i in g.m_Gamedata.units) {
 									var ug = g.GetUnit$0(i);
 									var research = player.m_PlayerResearch.GetResearchItemFomMdbId(ug.tl);
@@ -81,20 +98,30 @@
 									for (var j in modules) {
 									  var module = modules[j];
 									  if (module.t == 1) {
-									    _this.active_modules.l.push(module.i);
+									    _this.attacker_modules.l.push(module.i);
 									  }
 									  if (research && module.t == 3 && research.m_Level == 2) {
-									    _this.active_modules.l.push(module.i);
+									    _this.attacker_modules.l.push(module.i);
 									  }
 									}
 								}
+								
+								_this.defender_modules = _this.attacker_modules;
+								
+								/*
+								var nums = [];
+								for (var j = 0; j < 1000; j++){
+									nums.push(j);
+								}
+								_this.active_modules.l = nums;
+								*/
 							}
 							catch(e) {
 								console.log(e);
 							}
 					  	
 					  	ClientLib.Vis.VisMain.GetInstance().add_ViewModeChange(_this.add_ViewModeChange);
-					  	var pid = ClientLib.Data.MainData.GetInstance().m_Player.accountId;
+					  	var pid = ClientLib.Data.MainData.GetInstance().m_Player.name;
 					  	// Add a refresh button for the user to manually check for pro. Should only need to do it one time at max
 					  	_this.buttonCheckPro = new qx.ui.form.Button("Refresh Pro");
 						  _this.buttonCheckPro.set({appearance: "button-text-small", toolTipText: "Try to load pro."});
@@ -133,7 +160,7 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.accountId.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + pid.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }
 					  }, 5000);
@@ -304,8 +331,8 @@
 						try {
 							offense_units = offense_units || own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId];
 							
-	            battleground.AddOffense(offense_units, this.active_modules);
-	            battleground.AddDefense(current_city.get_CityUnitsData(), this.active_modules);
+	            battleground.AddOffense(offense_units, this.attacker_modules);
+	            battleground.AddDefense(current_city.get_CityUnitsData(), this.defender_modules);
             }
             catch (e) {
             	battleground.AddOffense(own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId]);
