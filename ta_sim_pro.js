@@ -595,7 +595,6 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
   this.lastCYPercentage = 0;
   var entities = battleground.m_Entities.d;
   var attacker = SharedLib.Combat.ECbtAlignment.Attacker;
-  console.log(battleground);
   for (var i in entities) {
   	var entity = entities[i];
   	var i_entity = entity.get_Entity$0();
@@ -702,7 +701,7 @@ TASuite.main.prototype.onDefenseDestroyed = function(sender, e) {
 TASuite.main.prototype.calculateSimResults = function() {
 	var battleground = this.setupBattleground(this.getCityPreArmyUnits());
   
-  // FIXME Run the simulation until it's done
+  // Run the simulation until it's done
 	while (battleground.m_Simulation.DoStep$0()) {	}
 	
   this.calculateTroopStrengths(battleground);

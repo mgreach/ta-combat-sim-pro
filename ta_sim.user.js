@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.1.4.0
+// @version        1.1.4.1
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -70,21 +70,6 @@
 					  setTimeout(function() {
 					  	try {
 						  	// Get the active modules
-						  	
-						  	
-						  	// FIXME - Put this in a refresh button somewhere in case they need to refresh...
-						  	/*
-						  	_this.attacker_modules = {};
-								_this.defender_modules = {};
-								var report_id = 3133449;
-								ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand ("GetCombatData",{playerReportId:report_id}, (new ClientLib.Net.CommandResult).$ctor(this,function(context, result){
-								var combatData=(new ClientLib.Data.Combat).$ctor$1();
-								combatData.SetCombatData$0(result); 
-								_this.attacker_modules = combatData.m_AttackerModules;
-								_this.defender_modules = combatData.m_DefenderModules;
-								}), null);
-								*/
-						  	
 								// Doing this the hard and unreliable way for now, until we figure out a better way
 								
 								_this.attacker_modules = {};
@@ -107,14 +92,6 @@
 								}
 								
 								_this.defender_modules = _this.attacker_modules;
-								
-								/*
-								var nums = [];
-								for (var j = 0; j < 1000; j++){
-									nums.push(j);
-								}
-								_this.active_modules.l = nums;
-								*/
 							}
 							catch(e) {
 								console.log(e);
@@ -346,6 +323,23 @@
             
             return battleground;
           },
+          getCityPreArmyUnits: function() {
+						var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
+						var units = null;
+						for (var key in armyBar) {
+							try {
+					      if (armyBar[key] instanceof ClientLib.Data.CityPreArmyUnits) {
+					        units = armyBar[key];
+					        break;
+					      }
+					    }
+					    catch (e) {
+					    	
+					    }
+					  }
+					  
+					  return units;
+					},
           startSimulation: function() {
           	var app = qx.core.Init.getApplication();
           	var player_cities = ClientLib.Data.MainData.GetInstance().get_Cities();
@@ -359,7 +353,9 @@
             catch (e) {
             	app.getPlayArea().setView(webfrontend.gui.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
             }
-            var battleground = this.setupBattleground();
+            
+            var units = this.getCityPreArmyUnits();
+            var battleground = this.setupBattleground(units);
             
             // Add the event listeners
             battleground.m_Simulation.add_DamageDone$0((new System.EventHandler).$ctor(this, this.onDamageDone));
