@@ -73,6 +73,17 @@
 								// Doing this the hard and unreliable way for now, until we figure out a better way
 								
 								_this.attacker_modules = {};
+								_this.defender_modules = {};
+								var report_id = 3133449;
+								ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand ("GetCombatData",{playerReportId:report_id}, (new ClientLib.Net.CommandResult).$ctor(this,function(context, result){
+								var combatData=(new ClientLib.Data.Combat).$ctor$1();
+								combatData.SetCombatData$0(result); 
+								_this.attacker_modules = combatData.m_AttackerModules;
+								_this.defender_modules = combatData.m_DefenderModules;
+								}), null);
+								
+								/*
+								_this.attacker_modules = {};
 								var g = ClientLib.Res.ResMain.GetInstance$10();
 								var player = ClientLib.Data.MainData.GetInstance$9().get_Player$2();
 								_this.attacker_modules.l = [];
@@ -92,6 +103,7 @@
 								}
 								
 								_this.defender_modules = _this.attacker_modules;
+								*/
 							}
 							catch(e) {
 								console.log(e);
@@ -323,23 +335,6 @@
             
             return battleground;
           },
-          getCityPreArmyUnits: function() {
-						var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
-						var units = null;
-						for (var key in armyBar) {
-							try {
-					      if (armyBar[key] instanceof ClientLib.Data.CityPreArmyUnits) {
-					        units = armyBar[key];
-					        break;
-					      }
-					    }
-					    catch (e) {
-					    	
-					    }
-					  }
-					  
-					  return units;
-					},
           startSimulation: function() {
           	var app = qx.core.Init.getApplication();
           	var player_cities = ClientLib.Data.MainData.GetInstance().get_Cities();
@@ -353,9 +348,7 @@
             catch (e) {
             	app.getPlayArea().setView(webfrontend.gui.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
             }
-            
-            var units = this.getCityPreArmyUnits();
-            var battleground = this.setupBattleground(units);
+            var battleground = this.setupBattleground();
             
             // Add the event listeners
             battleground.m_Simulation.add_DamageDone$0((new System.EventHandler).$ctor(this, this.onDamageDone));

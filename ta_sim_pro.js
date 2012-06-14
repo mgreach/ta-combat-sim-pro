@@ -532,7 +532,6 @@ TASuite.main.prototype.compareTargets = function() {
 		// Check if the primary is equal, if so, check the secondary
 		if ((this.lastPrimary * np) == (this.currentPrimary * np)) {
 			if ((this.lastSecondary * ns) > (this.currentSecondary * ns)) {
-				// TODO - Figure out a better ratio, such as 1/2 the power of primary
 				//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
 				return true;
 			}
@@ -602,7 +601,6 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
 	  	// This is one of the good guys
 	  	total_hp += i_entity.m_iHitpoints;
 	  	end_hp += i_entity.m_iHitpointsCurrent;
-	  	// TODO - Weight the percentage by the AP count for the unit (5, 10, 15, etc), as well as level of the unit
 	  	if (entity.m_UnitType.AirUnit) {
 	  		a_total_hp += i_entity.m_iHitpoints;
 	  		a_end_hp += i_entity.m_iHitpointsCurrent;
@@ -646,9 +644,9 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
 	  }
   }
   
-	this.lastInfantryPercentage = (i_end_hp / i_total_hp) * 100;
-	this.lastVehiclePercentage = (v_end_hp / v_total_hp) * 100;
-	this.lastAirPercentage = (a_end_hp / a_total_hp) * 100;
+	this.lastInfantryPercentage = i_total_hp ? (i_end_hp / i_total_hp) * 100 : 100;
+	this.lastVehiclePercentage = v_total_hp ? (v_end_hp / v_total_hp) * 100 : 100;
+	this.lastAirPercentage = a_total_hp ? (a_end_hp / a_total_hp) * 100 : 100;
 	this.totalSeconds = (battleground.m_Simulation.m_iCombatStep * battleground.m_TimePerStep) / 1000;
   
   this.lastEnemyUnitsPercentage = (eu_end_hp / eu_total_hp) * 100;
@@ -702,7 +700,7 @@ TASuite.main.prototype.calculateSimResults = function() {
 	var battleground = this.setupBattleground(this.getCityPreArmyUnits());
   
   // Run the simulation until it's done
-	while (battleground.m_Simulation.DoStep$0()) {	}
+	while (battleground.m_Simulation.DoStep$0(false)) {	}
 	
   this.calculateTroopStrengths(battleground);
   
