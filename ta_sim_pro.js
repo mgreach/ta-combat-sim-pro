@@ -700,7 +700,7 @@ TASuite.main.prototype.calculateSimResults = function() {
 	var battleground = this.setupBattleground(this.getCityPreArmyUnits());
   
   // Run the simulation until it's done
-	while (battleground.m_Simulation.DoStep$0(false)) {	}
+	//while (battleground.m_Simulation.DoStep$0(false)) {	}
 	
   this.calculateTroopStrengths(battleground);
   

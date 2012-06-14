@@ -72,6 +72,7 @@
 						  	// Get the active modules
 								// Doing this the hard and unreliable way for now, until we figure out a better way
 								
+								/*
 								_this.attacker_modules = {};
 								_this.defender_modules = {};
 								var report_id = 3133449;
@@ -81,8 +82,8 @@
 								_this.attacker_modules = combatData.m_AttackerModules;
 								_this.defender_modules = combatData.m_DefenderModules;
 								}), null);
+								*/
 								
-								/*
 								_this.attacker_modules = {};
 								var g = ClientLib.Res.ResMain.GetInstance$10();
 								var player = ClientLib.Data.MainData.GetInstance$9().get_Player$2();
@@ -103,14 +104,12 @@
 								}
 								
 								_this.defender_modules = _this.attacker_modules;
-								*/
 							}
 							catch(e) {
 								console.log(e);
 							}
 					  	
 					  	ClientLib.Vis.VisMain.GetInstance().add_ViewModeChange(_this.add_ViewModeChange);
-					  	var pid = ClientLib.Data.MainData.GetInstance().m_Player.name;
 					  	// Add a refresh button for the user to manually check for pro. Should only need to do it one time at max
 					  	_this.buttonCheckPro = new qx.ui.form.Button("Refresh Pro");
 						  _this.buttonCheckPro.set({appearance: "button-text-small", toolTipText: "Try to load pro."});
@@ -120,7 +119,7 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + pid.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }, _this);
 						  _this.battleResultsBox.add(_this.buttonCheckPro);
@@ -134,9 +133,9 @@
 						  proDonateText.setTextColor("white");
 						  _this.battleResultsBox.add(proDonateText);
 						  
-						  if (pid) {
+						  if (ClientLib.Data.MainData.GetInstance().m_Player.name) {
 							  var paypalButton = new qx.ui.basic.Label().set({
-							    value: "<form action='https://www.paypal.com/cgi-bin/webscr' method='post'><input type='hidden' name='cmd' value='_s-xclick'><input type='hidden' name='hosted_button_id' value='DB5VHSWX3CKR4'><input type='hidden' name='custom' value='" + pid.toString() +"'><input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif' border='0' name='submit' alt='PayPal - The safer, easier way to pay online!'><img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'></form>",
+							    value: "<form action='https://www.paypal.com/cgi-bin/webscr' method='post'><input type='hidden' name='cmd' value='_s-xclick'><input type='hidden' name='hosted_button_id' value='DB5VHSWX3CKR4'><input type='hidden' name='custom' value='" + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() +"'><input type='image' src='https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif' border='0' name='submit' alt='PayPal - The safer, easier way to pay online!'><img alt='' border='0' src='https://www.paypalobjects.com/en_US/i/scr/pixel.gif' width='1' height='1'></form>",
 							    rich : true,
 							    width: 180,
 							    textAlign: 'center'
@@ -149,10 +148,10 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + pid.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }
-					  }, 5000);
+					  }, 10000);
 					  
             var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
             armyBar.add(this.buttonSimulateCombat, {top: 130, right: 0});
@@ -332,6 +331,8 @@
             
             // Initiation
             battleground.StartBattle();
+            
+            console.log(battleground);
             
             return battleground;
           },
