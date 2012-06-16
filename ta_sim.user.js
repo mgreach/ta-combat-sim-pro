@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.1.4.1
+// @version        1.1.6
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -182,6 +182,8 @@
 	          			// Reset the battleground
 	          			this.bustCache();
 	          		}
+	          		
+	          		this.setupBattleground();
 	          	}
 	          	if (newMode == webfrontend.gui.PlayArea.PlayArea.modes.EMode_PlayerDefense) {
 	          		this.closeProBox();
@@ -195,6 +197,8 @@
 	          			// Reset the battleground
 	          			this.bustCache();
 	          		}
+	          		
+	          		this.setupBattleground();
 	          	}
 	          	if (newMode == webfrontend.gui.PlayArea.modes.EMode_PlayerDefense) {
 	          		this.closeProBox();
@@ -285,55 +289,153 @@
         		}
           },
           setupBattleground: function(offense_units) {
-          	var app = qx.core.Init.getApplication();
           	var mainData = ClientLib.Data.MainData.GetInstance();
-            var vis_main = ClientLib.Vis.VisMain.GetInstance();
             var player_cities = mainData.get_Cities();
             var current_city = player_cities.get_CurrentCity();
             var own_city = player_cities.get_CurrentOwnCity();
-          	var battleground = vis_main.get_Battleground();
             
             localStorage.ta_sim_last_city = current_city.get_Id();
             
-            // First reset the battlefield
-            battleground.Reset();
-            battleground.m_CurrentReplay = null;
-            battleground.InitBattle();
-            battleground.m_BattleDuration = (1200 * Math.floor(0x3e8 / battleground.m_SimSetup.get_SubSteps$0()));
-            
-            // Let's add the bonuses for POI
             var alliance = ClientLib.Data.MainData.GetInstance().m_Alliance;
+            var combatData = (new ClientLib.Data.Combat).$ctor$1();
+            combatData.m_Version = 1;
+            
+            var unitData = own_city.m_CityUnits.m_OffenseUnits.l;
+            var data = new Array();
+            
             try {
-              battleground.set_BoostOffInfantry(alliance.get_POIInfantryBonus());
-              battleground.set_BoostOffVehicles(alliance.get_POIVehicleBonus());
-              battleground.set_BoostOffAir(alliance.get_POIAirBonus());
-              battleground.set_BoostDef(current_city.m_AllianceDefenseBonus);
+            	console.log(offense_units);
+            	offense_units = offense_units || own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[current_city.get_Id()];
+            	console.log(offense_units);
+	            for(var i = 0; i < unitData.length; i++)  {
+	              var info = new Object();
+	              info.h = unitData[i].m_CurrentHealth;
+	              info.i = unitData[i].m_MdbUnitId
+	              info.l = unitData[i].m_CurrentLevel
+	              info.x = offense_units.m_ArmyUnits.l[i].m_CoordX
+	              info.y = offense_units.m_ArmyUnits.l[i].m_CoordY
+	              data.push(info);
+	            }
             }
             catch (e) {
-              console.log(e);
+            	console.log(e);
             }
+            combatData.m_Attacker = data;
             
-            // Add the offense, defense and base
-            battleground.AddBase(current_city);
-            
-						try {
-							offense_units = offense_units || own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId];
-							
-	            battleground.AddOffense(offense_units, this.attacker_modules);
-	            battleground.AddDefense(current_city.get_CityUnitsData(), this.defender_modules);
+            unitData = current_city.m_CityUnits.m_DefenseUnits.l;
+            data = new Array();
+            for(i = 0; i < unitData.length; i++)  {
+              info = new Object();
+              info.h = unitData[i].m_CurrentHealth;
+              info.i = unitData[i].m_MdbUnitId;
+              info.l = unitData[i].m_CurrentLevel;
+              info.x = unitData[i].m_Coords.m_iX;
+              info.y = unitData[i].m_Coords.m_iY;
+              data.push(info);
             }
-            catch (e) {
-            	battleground.AddOffense(own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId]);
-	            battleground.AddDefense(current_city.get_CityUnitsData());
+            combatData.m_Defender = data;
+
+            data = new Array();
+            for (var i=0; (i < 9); i++) {
+              for (var j=0; (j < 8); j++) {
+                var terrainType=current_city.GetResourceType$0(i, (j + current_city.get_CityHeight$0()));
+                var unitType=-1;
+                switch (terrainType)
+                {
+                  case ClientLib.Data.ECityTerrainType.FOREST: {
+                    unitType=0x7c;
+                    break;
+                  }
+                  case ClientLib.Data.ECityTerrainType.BRIAR: {
+                    unitType=0x7b;
+                    break;
+                  }
+                  case ClientLib.Data.ECityTerrainType.SWAMP: {
+                    unitType=0x7d;
+                    break;
+                  }
+                  case ClientLib.Data.ECityTerrainType.WATER: {
+                    unitType=0x7e;
+                    break;
+                  }
+                }
+                if(unitType != -1)
+                {
+                  info = new Object();
+                  info.h = 100;
+                  info.i = unitType;
+                  info.l = 1;
+                  info.x = i;
+                  info.y = j;
+                  data.push(info);
+                }
+              }
+            } 
+            combatData.m_Blocker = data;
+
+            unitData = current_city.m_CityBuildings.m_Buildings.l;
+            data = new Array();
+            for(i = 0; i < unitData.length; i++)  {
+              info = new Object();
+              info.h = unitData[i].m_CurrentHealth;
+              info.i = unitData[i].m_MdbUnitId;
+              info.l = unitData[i].m_CurrentLevel;
+              info.x = unitData[i].m_Coords.m_iX;
+              info.y = unitData[i].m_Coords.m_iY;
+              data.push(info);
             }
+            combatData.m_Buildings = data;
             
-            battleground.SetDefender(current_city.get_Name(), current_city.get_OwnerName(), current_city.get_OwnerAllianceName(), current_city.get_CityFaction());
+            combatData.m_Supports = null;
+            combatData.m_StartStep = 5902339;
+            combatData.m_CombatSteps = 1;
+            combatData.m_BoostInfantry = alliance.get_POIInfantryBonus();
+            combatData.m_BoostVehicle = alliance.get_POIVehicleBonus();
+            combatData.m_BoostAir = alliance.get_POIAirBonus();
+            combatData.m_BoostDefense = current_city.m_AllianceDefenseBonus;
+            combatData.m_AttackerBaseId = own_city.get_Id();
+            combatData.m_AttackerBaseName = own_city.get_Name();
+            combatData.m_AttackerPlayerId = own_city.get_PlayerId();
+            combatData.m_AttackerPlayerName = own_city.get_OwnerName();
+            combatData.m_AttackerAllianceId = own_city.get_AllianceId();
+            combatData.m_AttackerAllianceName = own_city.get_OwnerAllianceName();
+            combatData.m_DefenderBaseId = current_city.get_Id();
+            combatData.m_DefenderBaseName = current_city.get_Name();
+            combatData.m_DefenderPlayerId = own_city.get_PlayerId();
+            combatData.m_DefenderPlayerName = current_city.get_OwnerName();
+            combatData.m_DefenderAllianceId = current_city.get_AllianceId();
+            combatData.m_DefenderAllianceName = current_city.get_OwnerAllianceName();
+            combatData.m_DefenderBlockStep = 0;
+            combatData.m_AttackTimeStamp = new Date().getTime();
+            var resourceLayout = new Object();
+            resourceLayout.l = new Array();
+            for (var i=0; (i < combatData.m_Buildings.length); i++) {
+              resourceLayout.l[combatData.m_Buildings[i].y] = 0;
+            }
+            combatData.m_ResourceLayout = resourceLayout;
+            combatData.m_DefenderFaction = current_city.get_CityFaction();
+            combatData.m_AttackerModules = this.attacker_modules;
+            combatData.m_DefenderModules = this.defender_modules;
             
-            // Initiation
-            battleground.StartBattle();
-            
-            console.log(battleground);
-            
+            if(((combatData.m_DefenderFaction == ClientLib.Base.EFactionType.FORFaction) || (combatData.m_DefenderFaction == ClientLib.Base.EFactionType.NPCBase)) || (combatData.m_DefenderFaction == ClientLib.Base.EFactionType.NPCCamp))
+            {
+	  					combatData.SetNPCNames$0();
+            }
+            combatData.m_MaxDuration = 120;
+            combatData.m_Complete = false;
+            if(combatData.m_Complete) {
+	  					combatData.m_Id=-1;
+            }
+            combatData.m_Debug = null;
+	
+            var battleground = ClientLib.Vis.VisMain.GetInstance().get_Battleground(); 
+            battleground.Reset();
+            battleground.m_CurrentReplay = combatData;
+            battleground.InitBattle$0();
+            battleground.SetCombatData$1(combatData);
+            battleground.StartBattle$0();
+            battleground.m_BattleDuration = (1200 * Math.floor(0x3e8 / battleground.m_SimSetup.get_SubSteps$0()));
+                          
             return battleground;
           },
           startSimulation: function() {

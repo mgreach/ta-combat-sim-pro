@@ -1,5 +1,3 @@
-// TODO - Calculate the Troop Repair Time
-
 TASuite.main.prototype.degree = null;
 TASuite.main.prototype.currentDx = null;
 TASuite.main.prototype.currentDy = null;
@@ -70,7 +68,7 @@ TASuite.main.prototype.initializePro = function() {
   this.battleResultsBox.setLayout(new qx.ui.layout.VBox(10));
   this.battleResultsBox.setShowMaximize(false);
   this.battleResultsBox.setShowMinimize(false);
-  this.battleResultsBox.moveTo(115, 200);
+  this.battleResultsBox.moveTo(115, 150);
   this.battleResultsBox.setHeight(400);
   this.battleResultsBox.setWidth(200);
   this.battleResultsBox.getApplicationRoot().set({
@@ -146,7 +144,7 @@ TASuite.main.prototype.initializePro = function() {
 	tVBox.setThemedPadding(2);
 	tVBox.setThemedBackgroundColor("#eef");
 	this.battleResultsBox.add(tVBox);
-	// The Troop Strength Label
+	// The Repair Time Label
   var tHBox1 = new qx.ui.container.Composite();
   tHBox1.setLayout(new qx.ui.layout.HBox(5));
   tHBox1.add(new qx.ui.basic.Label("Repair Time: "));
@@ -154,6 +152,14 @@ TASuite.main.prototype.initializePro = function() {
 	tHBox1.add(this.simRepairTimeLabel);
 	this.simRepairTimeLabel.setTextColor("blue");
 	tVBox.add(tHBox1);
+	// The Troop Strength Label
+	var tHBox5 = new qx.ui.container.Composite();
+  tHBox5.setLayout(new qx.ui.layout.HBox(5));
+  tHBox5.add(new qx.ui.basic.Label("Overall: "));
+  this.simTroopDamageLabel = new qx.ui.basic.Label("100%");
+	tHBox5.add(this.simTroopDamageLabel);
+	this.simTroopDamageLabel.setTextColor("blue");
+	tVBox.add(tHBox5);
 	// The Infantry Troop Strength Label
   var tHBox2 = new qx.ui.container.Composite();
   tHBox2.setLayout(new qx.ui.layout.HBox(5));
@@ -224,6 +230,7 @@ TASuite.main.prototype.initializePro = function() {
 	var primarySelectDefault = new qx.ui.form.ListItem("C. Yard", null, "CY");
 	this.primarySelect.add(primarySelectDefault);
 	this.primarySelect.add(new qx.ui.form.ListItem("Repair Time", null, "RT"));
+	this.primarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
 	this.primarySelect.add(new qx.ui.form.ListItem("Defense Facility", null, "DF"));
 	this.primarySelect.add(new qx.ui.form.ListItem("Enemy Troops", null, "ES"));
 	this.primarySelect.setSelection([primarySelectDefault]);
@@ -237,6 +244,7 @@ TASuite.main.prototype.initializePro = function() {
 	this.secondarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
 	var secondarySelectDefault = new qx.ui.form.ListItem("Repair Time", null, "RT");
 	this.secondarySelect.add(secondarySelectDefault);
+	this.primarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
 	this.secondarySelect.add(new qx.ui.form.ListItem("Defense Facility", null, "DF"));
 	this.secondarySelect.add(new qx.ui.form.ListItem("Enemy Troops", null, "ES"));
 	this.secondarySelect.setSelection([secondarySelectDefault]);
@@ -285,7 +293,9 @@ TASuite.main.prototype.getCityPreArmyUnits = function() {
 TASuite.main.prototype.closeProBox = function() {
 	try {
 		var units = this.getCityPreArmyUnits();
-		units.remove_ArmyChanged(this.add_ArmyChanged);
+		if (units) {
+			units.remove_ArmyChanged(this.add_ArmyChanged);
+		}
 		this.battleResultsBox.close();
 	}
 	catch(e) {
@@ -319,7 +329,7 @@ TASuite.main.prototype.togglePro = function() {
     */
     
 		this.updateProWindow();
-		this.battleResultsBox.moveTo(115, 200);
+		this.battleResultsBox.moveTo(115, 150);
 	  this.battleResultsBox.setHeight(400);
 	  this.battleResultsBox.setWidth(200);
 		this.battleResultsBox.open();
@@ -494,6 +504,8 @@ TASuite.main.prototype.getTarget = function(key) {
 			return this.lastCYPercentage;
 		case 'RT':
 			return this.lastRepairTime;
+		case 'TS':
+			return this.lastPercentage;
 		case 'ES':
 			return this.lastEnemyPercentage;
 	}
@@ -700,7 +712,7 @@ TASuite.main.prototype.calculateSimResults = function() {
 	var battleground = this.setupBattleground(this.getCityPreArmyUnits());
   
   // Run the simulation until it's done
-	//while (battleground.m_Simulation.DoStep$0(false)) {	}
+	while (battleground.m_Simulation.DoStep$0(false)) {	}
 	
   this.calculateTroopStrengths(battleground);
   
@@ -730,7 +742,7 @@ TASuite.main.prototype.updateProWindow = function() {
   
   // Calculate the Repair time in seconds
   this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
-  
+  this.simTroopDamageLabel.setValue(this.lastPercentage.toFixed(2).toString());
 };
 
 TASuite.main.prototype.formatSecondsAsTime = function(secs, format) {
