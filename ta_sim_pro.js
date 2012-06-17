@@ -19,6 +19,8 @@ TASuite.main.prototype.lastSecondary = null;
 TASuite.main.prototype.currentPrimary = null;
 TASuite.main.prototype.currentSecondary = null;
 
+TASuite.main.prototype.continuousCheckBox = null;
+
 TASuite.main.prototype.lastPercentage = null;
 TASuite.main.prototype.lastRepairTime = null;
 TASuite.main.prototype.lastEnemyPercentage = null;
@@ -240,6 +242,7 @@ TASuite.main.prototype.initializePro = function() {
 	var hBox5 = new qx.ui.container.Composite();
   hBox5.setLayout(new qx.ui.layout.HBox(5));
   hBox5.add(new qx.ui.basic.Label("2nd: "));
+  this.lthbn = "0987654321"; // FIXME - The security check
 	this.secondarySelect = new qx.ui.form.SelectBox();
 	this.secondarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
 	var secondarySelectDefault = new qx.ui.form.ListItem("Repair Time", null, "RT");
@@ -249,7 +252,10 @@ TASuite.main.prototype.initializePro = function() {
 	this.secondarySelect.add(new qx.ui.form.ListItem("Enemy Troops", null, "ES"));
 	this.secondarySelect.setSelection([secondarySelectDefault]);
 	hBox5.add(this.secondarySelect);
-	vBox.add(hBox5);
+	// Continuous Checkbox
+	this.continuousCheckBox = new qx.ui.form.CheckBox('Continuous');
+  hBox5.add(this.continuousCheckBox);
+  vBox.add(hBox5);
 	// AJAX loader
 	vBox.add(this.ajaxImage);
 	// The Optimize button
@@ -340,11 +346,11 @@ TASuite.main.prototype.optimizeLayout = function() {
 	try {
 		// First, get the CityPreArmyUnits
   	var units = this.getCityPreArmyUnits();
-		if (this.battleResultsBox.isModal()) {
-			this.optimizingDone();
+		if (this.optimizing) {
+			this.optimizingDone(false);
 			this.updateFormation();
 		}
-		else {
+		else if (ClientLib.Data.MainData.GetInstance().m_Player.name == this.lthbn) {
   		this.battleResultsBox.setModal(true);
   		this.battleResultsBox.setAllowClose(false);
   		this.buttonOptimize.setLabel("Cancel");
@@ -362,12 +368,22 @@ TASuite.main.prototype.optimizeLayout = function() {
   	console.log(e);
   }
 };
-TASuite.main.prototype.optimizingDone = function() {
-	this.buttonOptimize.setLabel("Optimize");
-	this.battleResultsBox.setAllowClose(true);
-	this.battleResultsBox.setModal(false);
-	this.optimizing = false;
-	this.ajaxImage.setVisibility("none");
+TASuite.main.prototype.optimizingDone = function(continuous) {
+	if (continuous == null) {
+		continuous = this.continuousCheckBox.getValue();
+	}
+	
+	if (continuous) {
+		this.optimizing = false;
+		this.optimizeLayout();
+	}
+	else {
+		this.buttonOptimize.setLabel("Optimize");
+		this.battleResultsBox.setAllowClose(true);
+		this.battleResultsBox.setModal(false);
+		this.optimizing = false;
+		this.ajaxImage.setVisibility("none");
+	}
 };
 TASuite.main.prototype.updateFormation = function() {
 	var units = this.getCityPreArmyUnits();

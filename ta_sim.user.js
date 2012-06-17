@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.1.6
+// @version        1.1.7
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -71,19 +71,6 @@
 					  	try {
 						  	// Get the active modules
 								// Doing this the hard and unreliable way for now, until we figure out a better way
-								
-								/*
-								_this.attacker_modules = {};
-								_this.defender_modules = {};
-								var report_id = 3133449;
-								ClientLib.Net.CommunicationManager.GetInstance().SendSimpleCommand ("GetCombatData",{playerReportId:report_id}, (new ClientLib.Net.CommandResult).$ctor(this,function(context, result){
-								var combatData=(new ClientLib.Data.Combat).$ctor$1();
-								combatData.SetCombatData$0(result); 
-								_this.attacker_modules = combatData.m_AttackerModules;
-								_this.defender_modules = combatData.m_DefenderModules;
-								}), null);
-								*/
-								
 								_this.attacker_modules = {};
 								var g = ClientLib.Res.ResMain.GetInstance$10();
 								var player = ClientLib.Data.MainData.GetInstance$9().get_Player$2();
@@ -119,7 +106,7 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/nw/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
 						  }, _this);
 						  _this.battleResultsBox.add(_this.buttonCheckPro);
@@ -148,8 +135,13 @@
 						  	var head = document.getElementsByTagName('head')[0];
 							  var script = document.createElement('script');
 							  script.type = 'text/javascript';
-							  script.src = 'https://www.moneyscripts.net/ta/ta/pb3/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
+							  script.src = 'https://www.moneyscripts.net/ta/ta/nw/' + ClientLib.Data.MainData.GetInstance().m_Player.name.toString() + "/" + new Date().getTime().toString();
 							  head.appendChild(script);
+						  }
+						  else {
+						  	if (window.TASuite.main.getInstance().calculateTroopStrengths != null) {
+					      	window.TASuite.main.getInstance() = null;
+					      }
 						  }
 					  }, 10000);
 					  
@@ -304,9 +296,7 @@
             var data = new Array();
             
             try {
-            	console.log(offense_units);
             	offense_units = offense_units || own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[current_city.get_Id()];
-            	console.log(offense_units);
 	            for(var i = 0; i < unitData.length; i++)  {
 	              var info = new Object();
 	              info.h = unitData[i].m_CurrentHealth;
