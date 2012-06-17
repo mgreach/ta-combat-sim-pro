@@ -11,13 +11,16 @@ TASuite.main.prototype.buttonOptimize = null;
 TASuite.main.prototype.degreeSelect = null;
 TASuite.main.prototype.primarySelect = null;
 TASuite.main.prototype.secondarySelect = null;
+TASuite.main.prototype.tertiarySelect = null;
 
 TASuite.main.prototype.add_ArmyChanged = null;
 
 TASuite.main.prototype.lastPrimary = null;
 TASuite.main.prototype.lastSecondary = null;
+TASuite.main.prototype.lastTertiary = null;
 TASuite.main.prototype.currentPrimary = null;
 TASuite.main.prototype.currentSecondary = null;
+TASuite.main.prototype.currentTertiary = null;
 
 TASuite.main.prototype.continuousCheckBox = null;
 
@@ -50,6 +53,7 @@ TASuite.main.prototype.simTroopDamageLabel = null;
 TASuite.main.prototype.simRepairTimeLabel = null;
 TASuite.main.prototype.simVictoryLabel = null;
 TASuite.main.prototype.simTimeLabel = null;
+TASuite.main.prototype.found_improvement = null;
 
 // Initialize the Pro mode
 TASuite.main.prototype.initializePro = function() {
@@ -210,17 +214,20 @@ TASuite.main.prototype.initializePro = function() {
 	this.simTimeLabel.setTextColor("black");
 	vBox.add(hBox1);
 	this.battleResultsBox.add(vBox);
+	// Continuous Checkbox
+	this.continuousCheckBox = new qx.ui.form.CheckBox('Continuous');
+  vBox.add(this.continuousCheckBox);
 	// Options for Optimize
 	// Degree selector
 	var hBox3 = new qx.ui.container.Composite()
   hBox3.setLayout(new qx.ui.layout.HBox(5));
   hBox3.add(new qx.ui.basic.Label("Mode: "));
 	this.degreeSelect = new qx.ui.form.SelectBox();
-	this.degreeSelect.add(new qx.ui.form.ListItem("Quick", null, "1"));
-	var averageChoice = new qx.ui.form.ListItem("Average", null, "2");
+	this.degreeSelect.add(new qx.ui.form.ListItem("Small", null, "1"));
+	var averageChoice = new qx.ui.form.ListItem("Medium", null, "2");
 	this.degreeSelect.add(averageChoice);
-	this.degreeSelect.add(new qx.ui.form.ListItem("Thorough", null, "4"));
-	this.degreeSelect.add(new qx.ui.form.ListItem("Exhaustive", null, "8"));
+	this.degreeSelect.add(new qx.ui.form.ListItem("Large", null, "4"));
+	this.degreeSelect.add(new qx.ui.form.ListItem("Full", null, "8"));
 	this.degreeSelect.setSelection([averageChoice]);
 	hBox3.add(this.degreeSelect);
 	vBox.add(hBox3);
@@ -234,7 +241,8 @@ TASuite.main.prototype.initializePro = function() {
 	this.primarySelect.add(new qx.ui.form.ListItem("Repair Time", null, "RT"));
 	this.primarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
 	this.primarySelect.add(new qx.ui.form.ListItem("Defense Facility", null, "DF"));
-	this.primarySelect.add(new qx.ui.form.ListItem("Enemy Troops", null, "ES"));
+	this.primarySelect.add(new qx.ui.form.ListItem("Enemy Strength", null, "ES"));
+	this.primarySelect.add(new qx.ui.form.ListItem("Battle Time", null, "BT"));
 	this.primarySelect.setSelection([primarySelectDefault]);
 	hBox4.add(this.primarySelect);
 	vBox.add(hBox4);
@@ -247,15 +255,28 @@ TASuite.main.prototype.initializePro = function() {
 	this.secondarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
 	var secondarySelectDefault = new qx.ui.form.ListItem("Repair Time", null, "RT");
 	this.secondarySelect.add(secondarySelectDefault);
-	this.primarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
+	this.secondarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
 	this.secondarySelect.add(new qx.ui.form.ListItem("Defense Facility", null, "DF"));
-	this.secondarySelect.add(new qx.ui.form.ListItem("Enemy Troops", null, "ES"));
+	this.secondarySelect.add(new qx.ui.form.ListItem("Enemy Strength", null, "ES"));
+	this.secondarySelect.add(new qx.ui.form.ListItem("Battle Time", null, "BT"));
 	this.secondarySelect.setSelection([secondarySelectDefault]);
 	hBox5.add(this.secondarySelect);
-	// Continuous Checkbox
-	this.continuousCheckBox = new qx.ui.form.CheckBox('Continuous');
-  hBox5.add(this.continuousCheckBox);
-  vBox.add(hBox5);
+	vBox.add(hBox5);
+	// Tertiary selector
+	var hBox6 = new qx.ui.container.Composite();
+  hBox6.setLayout(new qx.ui.layout.HBox(5));
+  hBox6.add(new qx.ui.basic.Label("3rd: "));
+	this.tertiarySelect = new qx.ui.form.SelectBox();
+	this.tertiarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
+	this.tertiarySelect.add(new qx.ui.form.ListItem("Repair Time", null, "RT"));
+	this.tertiarySelect.add(new qx.ui.form.ListItem("Troop Strength", null, "TS"));
+	this.tertiarySelect.add(new qx.ui.form.ListItem("Defense Facility", null, "DF"));
+	var tertiarySelectDefault = new qx.ui.form.ListItem("Enemy Strength", null, "ES");
+	this.tertiarySelect.add(tertiarySelectDefault);
+	this.tertiarySelect.add(new qx.ui.form.ListItem("Battle Time", null, "BT"));
+	this.tertiarySelect.setSelection([tertiarySelectDefault]);
+	hBox6.add(this.tertiarySelect);
+	vBox.add(hBox6);
 	// AJAX loader
 	vBox.add(this.ajaxImage);
 	// The Optimize button
@@ -360,7 +381,7 @@ TASuite.main.prototype.optimizeLayout = function() {
   		this.updateProWindow();
   		this.setTargets();
   		this.degree = parseInt(this.degreeSelect.getSelection()[0].getModel());
-  		
+  		this.found_improvement = false;
   		this.checkBetterFormation();
   	}
   }
@@ -372,8 +393,7 @@ TASuite.main.prototype.optimizingDone = function(continuous) {
 	if (continuous == null) {
 		continuous = this.continuousCheckBox.getValue();
 	}
-	
-	if (continuous) {
+	if (continuous && this.found_improvement) {
 		this.optimizing = false;
 		this.optimizeLayout();
 	}
@@ -505,12 +525,15 @@ TASuite.main.prototype.setTargets = function() {
 	//console.log("Setting the targets");
 	var p = this.primarySelect.getSelection()[0].getModel();
 	var s = this.secondarySelect.getSelection()[0].getModel();
+	var t = this.tertiarySelect.getSelection()[0].getModel();
 	
 	this.lastPrimary = this.getTarget(p);
 	this.lastSecondary = this.getTarget(s);
+	this.lastTertiary = this.getTarget(t);
 	
 	this.currentPrimary = this.lastPrimary;
 	this.currentSecondary = this.lastSecondary;
+	this.currentTertiary = this.lastTertiary;
 };
 TASuite.main.prototype.getTarget = function(key) {
 	switch (key) {
@@ -524,19 +547,24 @@ TASuite.main.prototype.getTarget = function(key) {
 			return this.lastPercentage;
 		case 'ES':
 			return this.lastEnemyPercentage;
+		case 'BT':
+			return this.totalSeconds;
 	}
 };
 TASuite.main.prototype.compareTargets = function() {
 	var np = 1;
 	var ns = 1;
+	var nt = 1;
 	var p = this.primarySelect.getSelection()[0].getModel();
 	var s = this.secondarySelect.getSelection()[0].getModel();
+	var t = this.tertiarySelect.getSelection()[0].getModel();
 	// Check if the primary should be negated
 	switch (p) {
 		case 'ES':
 		case 'DF':
 		case 'CY':
 		case 'RT':
+		case 'BT':
 			np = -1;
 			break;
 	}
@@ -545,36 +573,48 @@ TASuite.main.prototype.compareTargets = function() {
 		case 'DF':
 		case 'CY':
 		case 'RT':
+		case 'BT':
 			ns = -1;
+			break;
+	}
+	switch (t) {
+		case 'ES':
+		case 'DF':
+		case 'CY':
+		case 'RT':
+		case 'BT':
+			nt = -1;
 			break;
 	}
 	this.lastPrimary = this.getTarget(p);
 	this.lastSecondary = this.getTarget(s);
+	this.lastTertiary = this.getTarget(t);
 	// Check if the primary is higher, if so, return true
 	if ((this.lastPrimary * np) > (this.currentPrimary * np)) {
 		//console.log("Primary " + (this.lastPrimary * np).toString() + " is better than " + (this.currentPrimary * np).toString());
 		return true;
 	}
-	else {
+	else if ((this.lastPrimary * np) == (this.currentPrimary * np)) {
 		//console.log("Primary " + (this.lastPrimary * np).toString() + " is worse than " + (this.currentPrimary * np).toString());
 		// Check if the primary is equal, if so, check the secondary
-		if ((this.lastPrimary * np) == (this.currentPrimary * np)) {
-			if ((this.lastSecondary * ns) > (this.currentSecondary * ns)) {
-				//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
+		if ((this.lastSecondary * ns) > (this.currentSecondary * ns)) {
+			//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
+			return true;
+		}
+		else if ((this.lastSecondary * ns) == (this.currentSecondary * ns)) {
+			if ((this.lastTertiary * nt) > (this.currentTertiary * nt)) {
 				return true;
 			}
-			else {
-				//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is worse than " + (this.currentSecondary * ns).toString());
-				return false;
-			}
 		}
-		return false;
 	}
+	
+	return false;
 };
 TASuite.main.prototype.checkNewResults = function() {
 	this.calculateSimResults();
 	
 	if (this.compareTargets()) {
+		this.found_improvement = true;
 		this.saveFormation();
 		this.setTargets();
 		this.updateProWindow();
