@@ -662,6 +662,9 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
   this.lastCYPercentage = 0;
   var entities = battleground.m_Entities.d;
   var attacker = SharedLib.Combat.ECbtAlignment.Attacker;
+  
+  // TODO - Get the x,y position of the enemy CY and DF, so we can add new metric for building in front of them
+  
   for (var i in entities) {
   	var entity = entities[i];
   	var i_entity = entity.get_Entity$0();
@@ -696,13 +699,13 @@ TASuite.main.prototype.calculateTroopStrengths = function(battleground) {
 	  		eb_total_hp += i_entity.m_iHitpoints;
 	  		eb_end_hp += i_entity.m_iHitpointsCurrent;
 	  		
-	  		if (i_entity.m_MDCTypeId == 195) {
-	  			// FIXME - This only works for forgotten bases
-		  		this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
-		  	}
-		  	if (i_entity.m_MDCTypeId == 177) {
-		  		this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
-		  	}
+	  		var unitType = ClientLib.Res.ResMain.GetInstance$10().get_Gamedata$0().units[i_entity.m_MDCTypeId].dnuc;  
+        if (unitType == 'DEFENSE FACILITY') {  
+            this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;  
+        } 
+        else if (unitType == 'CONSTRUCTION YARD') {  
+            this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;  
+        };
 	  	}
 	  	else {
 	  		// Unit
