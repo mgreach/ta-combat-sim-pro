@@ -344,17 +344,6 @@ TASuite.main.prototype.togglePro = function() {
     	console.log(e);
     }
     
-    /*
-    var own_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentOwnCity();
-    setup_units = own_city.m_CityArmyFormationsManager.m_ArmyFormations.d[own_city.m_CityArmyFormationsManager.m_CurrentTargetBaseId];
-    
-    units.m_ArmyUnits = setup_units.m_ArmyUnits;
-    
-    units.RefreshData$0();
-    units.UpdateArmyLayout$0();
-    units.UpdateFormation();
-    */
-    
 		this.updateProWindow();
 		this.battleResultsBox.moveTo(115, 150);
 	  this.battleResultsBox.setHeight(400);
