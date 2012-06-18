@@ -45,6 +45,7 @@
 					currentSecondary: null,
 					currentTertiary: null,
 					continuousCheckBox: null,
+					soundCheckBox: null,
 					lastPercentage: null,
 					lastRepairTime: null,
 					lastEnemyPercentage: null,
@@ -72,8 +73,10 @@
 					simRepairTimeLabel: null,
 					simVictoryLabel: null,
 					simTimeLabel: null,
+					doneSound: null,
 					found_improvement: null,
           initialize: function() {
+          	this.doneSound = new Audio("https://dl.dropbox.com/u/41023713/tasim_done_snd.wav");
           	this.add_ViewModeChange = (new ClientLib.Vis.ViewModeChange).$ctor(this, this.onViewChange);
             this.buttonSimulateCombat = new qx.ui.form.Button("Simulate");
             this.buttonSimulateCombat.set({width: 80, appearance: "button-text-small", toolTipText: "Start Combat Simulation"});
@@ -292,6 +295,9 @@
 						// Continuous Checkbox
 						this.continuousCheckBox = new qx.ui.form.CheckBox('Continuous');
 					  vBox.add(this.continuousCheckBox);
+					  // Sound Checkbox
+						this.soundCheckBox = new qx.ui.form.CheckBox('Play Sound');
+					  vBox.add(this.soundCheckBox);
 						// Options for Optimize
 						// Degree selector
 						var hBox3 = new qx.ui.container.Composite()
@@ -325,7 +331,6 @@
 						var hBox5 = new qx.ui.container.Composite();
 					  hBox5.setLayout(new qx.ui.layout.HBox(5));
 					  hBox5.add(new qx.ui.basic.Label("2nd: "));
-					  this.lthbn = "0987654321"; // FIXME - The security check
 						this.secondarySelect = new qx.ui.form.SelectBox();
 						this.secondarySelect.add(new qx.ui.form.ListItem("C. Yard", null, "CY"));
 						var secondarySelectDefault = new qx.ui.form.ListItem("Repair Time", null, "RT");
@@ -421,7 +426,7 @@
 								this.optimizingDone(false);
 								this.updateFormation();
 							}
-							else if (ClientLib.Data.MainData.GetInstance().m_Player.name == this.lthbn) {
+							else {
 					  		this.battleResultsBox.setModal(true);
 					  		this.battleResultsBox.setAllowClose(false);
 					  		this.buttonOptimize.setLabel("Cancel");
@@ -453,6 +458,10 @@
 							this.battleResultsBox.setModal(false);
 							this.optimizing = false;
 							this.ajaxImage.setVisibility("none");
+							var play_sound = this.soundCheckBox.getValue();
+							if (play_sound) {
+								this.doneSound.play();
+							}
 						}
 					},
 					checkBetterFormation: function() {
