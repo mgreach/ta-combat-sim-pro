@@ -491,10 +491,8 @@
 						return false;
 					},
 					moveLoop: function() {
-						//console.log("Start of moveLoop");
 						ta = window.TASuite.main.getInstance();
 						if (!ta.optimizing) {
-							//console.log("No longer optimizing.");
 							return;
 						}
 						// First check if this move is legal
@@ -515,7 +513,6 @@
 							if (new_x >= 0 && new_x < 8) {
 								if (new_y >= 0 && new_y < 4) {
 									// Move the unit
-									//console.log("Moving the unit x: " + new_x.toString() + " y: " + new_y.toString());
 									// TODO - First, check if the unit is a different type or level
 									/*
 									var other_unit = units.GetUnitByCoord(new_x,new_y);
@@ -549,12 +546,10 @@
 						ta.currentDx = dx;
 						ta.currentDy = dy;
 						setTimeout(ta.moveLoop, 10);
-						//console.log("End of moveLoop");
 					},
 					nextUnit: function() {
 						// Set the next unit if this isn't the last one, and start the loop again
 						if (this.units_list.length > 0) {
-							//console.log("Going to next unit");
 							this.currentDx = this.degree;
 							this.currentDy = this.degree;
 							this.currentUnit = this.units[this.units_list.pop()];
@@ -564,18 +559,15 @@
 							// Subtract the degree and start over
 							this.degree -= 1;
 							if (this.degree > 0) {
-								//console.log("Moving to next degree");
 								this.checkBetterFormation();
 							}
 							else {
-								//console.log("Done Optimizing");
 								this.optimizingDone();
 								this.updateFormation();
 							}
 						}
 					},
 					setTargets: function() {
-						//console.log("Setting the targets");
 						var p = this.primarySelect.getSelection()[0].getModel();
 						var s = this.secondarySelect.getSelection()[0].getModel();
 						var t = this.tertiarySelect.getSelection()[0].getModel();
@@ -644,14 +636,11 @@
 						this.lastTertiary = this.getTarget(t);
 						// Check if the primary is higher, if so, return true
 						if ((this.lastPrimary * np) > (this.currentPrimary * np)) {
-							//console.log("Primary " + (this.lastPrimary * np).toString() + " is better than " + (this.currentPrimary * np).toString());
 							return true;
 						}
 						else if ((this.lastPrimary * np) == (this.currentPrimary * np)) {
-							//console.log("Primary " + (this.lastPrimary * np).toString() + " is worse than " + (this.currentPrimary * np).toString());
 							// Check if the primary is equal, if so, check the secondary
 							if ((this.lastSecondary * ns) > (this.currentSecondary * ns)) {
-								//console.log("Secondary " + (this.lastSecondary * ns).toString() + " is better than " + (this.currentSecondary * ns).toString());
 								return true;
 							}
 							else if ((this.lastSecondary * ns) == (this.currentSecondary * ns)) {
@@ -696,7 +685,6 @@
 						}
 					},
 					calculateTroopStrengths: function(battleground) {
-						//console.log("Calculating Troop Strengths");
 						var total_hp = 0;
 					  var end_hp = 0;
 					  var e_total_hp = 0;
