@@ -1,8 +1,0 @@
-;$Id$
-name = TA Helper
-description = TA Helper
-version = 7.x-1.0
-core = 7.x
-files[] = ta.install
-files[] = ta.module
-package = Tiberium Alliances
