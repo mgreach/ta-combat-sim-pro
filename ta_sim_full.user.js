@@ -508,7 +508,6 @@
 	          	if (!layouts.hasOwnProperty(current_city)) {
 	          		layouts[current_city] = city_layouts;
 	          	}
-	          	console.log(layouts);
 	          	layouts[current_city][lid] = {
 	          		id: lid,
 	          		label: title,
