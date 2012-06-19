@@ -962,13 +962,12 @@
 						  		eb_total_hp += i_entity.m_iHitpoints;
 						  		eb_end_hp += i_entity.m_iHitpointsCurrent;
 						  		
-						  		var unitType = ClientLib.Res.ResMain.GetInstance$10().get_Gamedata$0().units[i_entity.m_MDCTypeId].dnuc;  
-					        if (unitType == 'DEFENSE FACILITY') {  
-					            this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;  
-					        } 
-					        else if (unitType == 'CONSTRUCTION YARD') {  
-					            this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;  
-					        };
+									if (i_entity.m_MDCTypeId == 195) { 
+										this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100; 
+									} 
+									else if (i_entity.m_MDCTypeId == 177) { 
+										this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100; 
+									}; 
 						  	}
 						  	else {
 						  		// Unit
