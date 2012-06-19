@@ -81,6 +81,11 @@
 					simRepairTimeLabel: null,
 					simVictoryLabel: null,
 					simTimeLabel: null,
+						lvlSupportLabel: null,
+						enemySupportLabel: null,			
+						lastInfantryRepairTime: null,
+						lastVehicleRepairTime: null,
+						lastAircraftRepairTime: null,
 					doneSound: null,
 					found_improvement: null,
           initialize: function() {
@@ -799,54 +804,44 @@
 						this.currentTertiary = this.lastTertiary;
 					},
 					getTarget: function(key) {
+					// i will add some options soon
 						switch (key) {
-							case 'DF':
+							case 'DF':// enemyDF -1
 								return this.lastDFPercentage;
-							case 'CY':
+							case 'CY':// enemyCY -1
 								return this.lastCYPercentage;
-							case 'RT':
+							case 'RT':// attackerRT -1
 								return this.lastRepairTime;
-							case 'TS':
+							case 'TS':// attacker Overall +1
 								return this.lastPercentage;
-							case 'ES':
+							case 'ES':// enemyBase -1
 								return this.lastEnemyPercentage;
-							case 'BT':
+							case 'BT':// battleTime -1
 								return this.totalSeconds;
 						}
 					},
 					compareTargets: function() {
-						var np = 1;
-						var ns = 1;
-						var nt = 1;
+					// simplyfied
+						var np = -1;
+						var ns = -1;
+						var nt = -1;
 						var p = this.primarySelect.getSelection()[0].getModel();
 						var s = this.secondarySelect.getSelection()[0].getModel();
 						var t = this.tertiarySelect.getSelection()[0].getModel();
 						// Check if the primary should be negated
 						switch (p) {
-							case 'ES':
-							case 'DF':
-							case 'CY':
-							case 'RT':
-							case 'BT':
-								np = -1;
+							case 'TS':
+								np = 1;
 								break;
 						}
 						switch (s) {
-							case 'ES':
-							case 'DF':
-							case 'CY':
-							case 'RT':
-							case 'BT':
-								ns = -1;
+							case 'TS':
+								ns = 1;
 								break;
 						}
 						switch (t) {
-							case 'ES':
-							case 'DF':
-							case 'CY':
-							case 'RT':
-							case 'BT':
-								nt = -1;
+							case 'TS':
+								nt = 1;
 								break;
 						}
 						this.lastPrimary = this.getTarget(p);
@@ -925,6 +920,11 @@
 					  var a_end_hp = 0;
 					  this.lastDFPercentage = 0;
 					  this.lastCYPercentage = 0;
+							this.SupportLevel = 0;
+							this.lastSupportPercentage = 0;											
+							this.lastInfantryRepairTime = 0;
+							this.lastVehicleRepairTime = 0;
+							this.lastAircraftRepairTime = 0;
 					  var entities = battleground.m_Entities.d;
 					  var attacker = SharedLib.Combat.ECbtAlignment.Attacker;
 					  
@@ -955,35 +955,36 @@
 						  	}
 						  }
 						  else {
-						  	// It is an enemy
+						  	// Enemy Overall
 						  	e_total_hp += i_entity.m_iHitpoints;
 						  	e_end_hp += i_entity.m_iHitpointsCurrent;
-					
-						  	if (entity.m_Type == 1) {
-						  		// Building
-						  		eb_total_hp += i_entity.m_iHitpoints;
-						  		eb_end_hp += i_entity.m_iHitpointsCurrent;
-						  		//112, CONSTRUCTION YARD
-						  		//151, CONSTRUCTION YARD
-						  		//177, CONSTRUCTION YARD
-						  		//158, DEFENSE FACILITY
-						  		//131, DEFENSE FACILITY
-						  		//195, DEFENSE FACILITY
-						  		switch(i_entity.m_MDCTypeId) {
-						  			case 112:
-						  			case 151:
-						  			case 177:
-						  				this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
-						  				break;
-						  			case 158:
-						  			case 131:
-						  			case 195:
-						  				this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
-						  				break;						  				
-						  		}
+						  		
+								if (i_entity.m_MDCTypeId >= 200 && i_entity.m_MDCTypeId <= 205) {
+									/* 200, FALCON SUPPORT
+									201, ION CANNON SUPPORT
+									202, SKYSTRIKE SUPPORT
+									203, EYE OF KANE
+									204, FIST OF KANE
+									205, BLADE OF KANE	*/
+									this.SupportLevel = parseInt(i_entity.m_iLevel); //m_iLevel
+									this.lastSupportPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
+								} else {
+									switch(i_entity.m_MDCTypeId) {
+										case 112://112, CONSTRUCTION YARD
+										case 151://151, CONSTRUCTION YARD
+										case 177://177, CONSTRUCTION YARD
+											this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
+											break;
+										case 158://158, DEFENSE FACILITY
+										case 131://131, DEFENSE FACILITY
+										case 195://195, DEFENSE FACILITY
+											this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
+											break;									
+									}
+								}
 						  	}
 						  	else {
-						  		// Unit
+						  		// Enemy Defence
 						  		eu_total_hp += i_entity.m_iHitpoints;
 						  		eu_end_hp += i_entity.m_iHitpointsCurrent;
 						  	}
