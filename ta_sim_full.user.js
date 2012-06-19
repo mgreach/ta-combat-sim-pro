@@ -60,6 +60,10 @@
 					lastAirPercentage: null,
 					lastEnemyUnitsPercentage: null,
 					lastEnemyBuildingsPercentage: null,
+					tiberiumSpoils: null,
+					crystalSpoils: null,
+					creditSpoils: null,
+					researchSpoils: null,
 					totalSeconds: null,
 					lastVictory: null,
 					saved_units: null,
@@ -422,6 +426,26 @@
 					    rich : true
 					  });
 					  pVBox.add(proHelpBar);
+					  // The Spoils
+					  var psVBox = new qx.ui.container.Composite()
+					  psVBox.setLayout(new qx.ui.layout.VBox(5));
+					  psVBox.setThemedFont("bold");
+						psVBox.setThemedPadding(2);
+						psVBox.setThemedBackgroundColor("#eef");
+						infoPage.add(psVBox);
+						psVBox.add(new qx.ui.basic.Label("Spoils"));
+						// Tiberium
+						this.tiberiumSpoils = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_tiberium.png");
+						psVBox.add(this.tiberiumSpoils);
+					  // Crystal
+					  this.crystalSpoils = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_chrystal.png");
+						psVBox.add(this.crystalSpoils);
+						// Credits
+						this.creditSpoils = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_dollar.png");
+						psVBox.add(this.creditSpoils);
+						// Research
+						this.researchSpoils = new qx.ui.basic.Atom("0", "webfrontend/ui/common/icn_res_research_mission.png");
+						psVBox.add(this.researchSpoils);
 						
 						this.battleResultsBox.add(tabView);
 						
@@ -520,6 +544,41 @@
           saveLayouts: function(layouts) {
           	localStorage.tasim_city_layouts = JSON.stringify(layouts);
           },
+          calculateLoot: function() {
+          	// Adapted from the CNC Loot script: http://userscripts.org/scripts/show/135953
+          	var city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity();
+	         	var num = city.m_CityBuildings.m_BuildSlotsCurrent;
+	         	var spoils = {
+	         		1: 0,
+	         		2: 0,
+	         		3: 0,
+	         		6: 0,
+	         		7: 0
+	         	};
+	         	
+            for (var j=num; --j >= 0; ) {
+              var building = city.m_CityBuildings.m_Buildings.l[j];
+              var mod = building.m_CurrentHealth / building.m_MaxHealth;
+              for(var i=building.m_UnitLevelRequirements.rer.length; --i >= 0;) {
+                spoils[building.m_UnitLevelRequirements.rer[i].t] += mod * building.m_UnitLevelRequirements.rer[i].c;
+              }
+            }
+
+            if(city.m_CityUnits.m_DefenseUnits != null)  {
+              num = city.m_CityUnits.m_DefenseUnits.l.length;
+              for (j=num; --j >= 0; ) {
+                var unit = city.m_CityUnits.m_DefenseUnits.l[j];
+                mod = unit.m_CurrentHealth / unit.m_MaxHealth;
+                for(i=unit.m_UnitLevelRequirements.rer.length; --i >= 0;) {
+                  spoils[unit.m_UnitLevelRequirements.rer[i].t] += mod * unit.m_UnitLevelRequirements.rer[i].c;
+                }
+              }
+            }
+            this.tiberiumSpoils.setLabel(this.formatNumberWithCommas(spoils[1]));
+						this.crystalSpoils.setLabel(this.formatNumberWithCommas(spoils[2]));
+						this.creditSpoils.setLabel(this.formatNumberWithCommas(spoils[3]));
+						this.researchSpoils.setLabel(this.formatNumberWithCommas(spoils[6]));
+          },
           getCityPreArmyUnits: function() {
 						var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
 						var units = null;
@@ -565,6 +624,7 @@
 					    }
 					    
 					    this.updateLayoutsList();
+					    this.calculateLoot();
 							this.updateProWindow();
 							this.battleResultsBox.open();
 						}
@@ -1035,6 +1095,9 @@
 					  // Calculate the Repair time in seconds
 					  this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
 					  this.simTroopDamageLabel.setValue(this.lastPercentage.toFixed(2).toString());
+					},
+					formatNumberWithCommas: function(x) {
+					  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 					},
 					formatSecondsAsTime: function(secs, format) {
 					  var hr  = Math.floor(secs / 3600);
