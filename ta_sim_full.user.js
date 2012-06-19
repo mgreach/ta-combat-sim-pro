@@ -17,6 +17,10 @@
         extend: qx.core.Object,
         members: {
           buttonSimulateCombat: null,
+          buttonLayoutSave: null,
+          buttonLayoutLoad: null,
+          layoutsList: null,
+          layoutsLabelText: null,
           buttonReturnSetup: null,
           buttonGetProTools: null,
           buttonCheckPro: null,
@@ -146,40 +150,36 @@
 					  this.ajaxImage.setVisibility("none");
 					  this.ajaxImage.setThemedAlignX("center");
 					  
-					  // The Battle Simulator Pro box
-					  this.battleResultsBox = new qx.ui.window.Window("Battle Simulator Pro");
-					  this.battleResultsBox.setPadding(10);
-					  this.battleResultsBox.setLayout(new qx.ui.layout.VBox(10));
+					  // The Battle Simulator box
+					  this.battleResultsBox = new qx.ui.window.Window("Battle Simulator");
+					  this.battleResultsBox.setPadding(1);
+					  this.battleResultsBox.setLayout(new qx.ui.layout.VBox(1));
 					  this.battleResultsBox.setShowMaximize(false);
 					  this.battleResultsBox.setShowMinimize(false);
-					  this.battleResultsBox.moveTo(115, 150);
+					  this.battleResultsBox.moveTo(115, 15);
 					  this.battleResultsBox.setHeight(400);
-					  this.battleResultsBox.setWidth(200);
+					  this.battleResultsBox.setWidth(250);
 					  this.battleResultsBox.getApplicationRoot().set({
 						  blockerColor: '#000000',
 						  blockerOpacity: 0.6
 						});
 						
-						// The Help Vertical Box
-					  var pVBox = new qx.ui.container.Composite()
-					  pVBox.setLayout(new qx.ui.layout.VBox(5));
-					  pVBox.setThemedFont("bold");
-						pVBox.setThemedPadding(2);
-						pVBox.setThemedBackgroundColor("#eef");
-						this.battleResultsBox.add(pVBox);
-						var proHelpBar = new qx.ui.basic.Label().set({
-					    value: "<a target='_blank' href='http://www.youtube.com/watch?v=TcgryVL9jnk'>Tutorial</a> | <a target='_blank' href='http://www.moneyscripts.net/ta/faq'>FAQ</a> | <a target='_blank' href='http://userscripts.org/scripts/discuss/130344'>Forums</a>",
-					    rich : true
-					  });
-					  pVBox.add(proHelpBar);
-						
-						// The Enemy Vertical Box
+						var tabView = new qx.ui.tabview.TabView();
+						tabView.setPadding(5);
+			
+			      ////////////////// Optimizer ////////////////////
+			      var optPage = new qx.ui.tabview.Page("Optimizer");
+			      optPage.setLayout(new qx.ui.layout.VBox(5));
+			      optPage.setPadding(1);
+			      tabView.add(optPage);
+			      
+			      // The Enemy Vertical Box
 					  var eVBox = new qx.ui.container.Composite()
 					  eVBox.setLayout(new qx.ui.layout.VBox(5));
 					  eVBox.setThemedFont("bold");
 						eVBox.setThemedPadding(2);
 						eVBox.setThemedBackgroundColor("#eef");
-						this.battleResultsBox.add(eVBox);
+						optPage.add(eVBox);
 						// The Enemy Troop Strength Label
 					  var eHBox1 = new qx.ui.container.Composite();
 					  eHBox1.setLayout(new qx.ui.layout.HBox(5));
@@ -227,7 +227,7 @@
 					  tVBox.setThemedFont("bold");
 						tVBox.setThemedPadding(2);
 						tVBox.setThemedBackgroundColor("#eef");
-						this.battleResultsBox.add(tVBox);
+						optPage.add(tVBox);
 						// The Repair Time Label
 					  var tHBox1 = new qx.ui.container.Composite();
 					  tHBox1.setLayout(new qx.ui.layout.HBox(5));
@@ -291,7 +291,7 @@
 						hBox1.add(this.simTimeLabel);
 						this.simTimeLabel.setTextColor("black");
 						vBox.add(hBox1);
-						this.battleResultsBox.add(vBox);
+						optPage.add(vBox);
 						// Continuous Checkbox
 						this.continuousCheckBox = new qx.ui.form.CheckBox('Continuous');
 					  vBox.add(this.continuousCheckBox);
@@ -360,12 +360,165 @@
 						// AJAX loader
 						vBox.add(this.ajaxImage);
 						// The Optimize button
-						this.battleResultsBox.add(this.buttonOptimize);
+						optPage.add(this.buttonOptimize);
+			
+			      ////////////////// Layouts ////////////////////
+			      var layoutPage = new qx.ui.tabview.Page("Layouts");
+			      layoutPage.setLayout(new qx.ui.layout.VBox());
+			      tabView.add(layoutPage);
 						
-						this.buttonProTools = new qx.ui.form.Button("Pro");
-					  this.buttonProTools.set({width: 50, appearance: "button-text-small", toolTipText: "Open Pro Simulator Tools"});
+			      this.layoutsList = new qx.ui.form.List();
+			      this.layoutsList.set({ height: 280, width: 180, selectionMode : "one" });
+			      layoutPage.add(this.layoutsList);
+			      
+			      // Add the two buttons for save and load
+			      var layHBox = new qx.ui.container.Composite();
+					  layHBox.setLayout(new qx.ui.layout.HBox(5));
+			      // Load button
+			      this.buttonLayoutLoad = new qx.ui.form.Button("Load");
+					  this.buttonLayoutLoad.set({width: 80, appearance: "button-text-small", toolTipText: "Load this saved layout."});
+					  this.buttonLayoutLoad.addListener("click", this.loadCityLayout, this);
+					  layHBox.add(this.buttonLayoutLoad);
+					  // Delete button
+					  this.buttonLayoutDelete = new qx.ui.form.Button("Delete");
+					  this.buttonLayoutDelete.set({width: 80, appearance: "button-text-small", toolTipText: "Delete this saved layout."});
+					  this.buttonLayoutDelete.addListener("click", this.deleteCityLayout, this);
+					  layHBox.add(this.buttonLayoutDelete);
+					  layoutPage.add(layHBox);
+					  
+					  var layVBox = new qx.ui.container.Composite()
+					  layVBox.setLayout(new qx.ui.layout.VBox(5));
+					  layVBox.setThemedFont("bold");
+						layVBox.setThemedPadding(2);
+						layVBox.setThemedBackgroundColor("#eef");
+						// The Label Textbox
+						var layHBox2 = new qx.ui.container.Composite()
+					  layHBox2.setLayout(new qx.ui.layout.HBox(5));
+						layHBox2.add(new qx.ui.basic.Label("Name: "));
+						this.layoutsLabelText = new qx.ui.form.TextField();
+						layHBox2.add(this.layoutsLabelText);
+						layVBox.add(layHBox2);
+						
+						this.buttonLayoutSave = new qx.ui.form.Button("Save");
+					  this.buttonLayoutSave.set({width: 80, appearance: "button-text-small", toolTipText: "Save this layout."});
+					  this.buttonLayoutSave.addListener("click", this.saveCityLayout, this);
+					  layVBox.add(this.buttonLayoutSave);
+					  layoutPage.add(layVBox);
+			      
+			      ////////////////// Info ////////////////////
+			      var infoPage = new qx.ui.tabview.Page("Info");
+			      infoPage.setLayout(new qx.ui.layout.VBox());
+			      tabView.add(infoPage);
+						
+						// The Help Vertical Box
+					  var pVBox = new qx.ui.container.Composite()
+					  pVBox.setLayout(new qx.ui.layout.VBox(5));
+					  pVBox.setThemedFont("bold");
+						pVBox.setThemedPadding(2);
+						pVBox.setThemedBackgroundColor("#eef");
+						infoPage.add(pVBox);
+						var proHelpBar = new qx.ui.basic.Label().set({
+					    value: "<a target='_blank' href='http://www.youtube.com/watch?v=TcgryVL9jnk'>Tutorial</a> | <a target='_blank' href='http://www.moneyscripts.net/ta/faq'>FAQ</a> | <a target='_blank' href='http://userscripts.org/scripts/discuss/130344'>Forums</a>",
+					    rich : true
+					  });
+					  pVBox.add(proHelpBar);
+						
+						this.battleResultsBox.add(tabView);
+						
+						this.buttonProTools = new qx.ui.form.Button("Tools");
+					  this.buttonProTools.set({width: 60, appearance: "button-text-small", toolTipText: "Open Simulator Tools"});
 					  this.buttonProTools.addListener("click", this.togglePro, this);
 					  armyBar.add(this.buttonProTools, {top: 17, right: 7});
+          },
+          updateLayoutsList: function() {
+          	this.layoutsList.removeAll();
+          	// Load the saved layouts for this city
+          	var layouts = this.loadCityLayouts();
+          	if (layouts) {
+				      for (var i in layouts) {
+				      	var layout = layouts[i];
+				        var item = new qx.ui.form.ListItem(layout.label, null, layout.id);
+				        this.layoutsList.add(item);
+				      };
+          	}
+          },
+          deleteCityLayout: function() {
+          	try {
+	          	var layouts = this.loadLayouts();
+	          	var current_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id();
+	          	var lid = this.layoutsList.getSelection()[0].getModel();
+	          	if (layouts && typeof layouts[current_city] != 'undefined' && typeof layouts[current_city][lid] != 'undefined') {
+		          	delete layouts[current_city][lid];
+		          	this.saveLayouts(layouts);
+	          		this.updateLayoutsList();
+	          	}
+          	}
+          	catch (e) {
+          		console.log(e);
+          	}
+          },
+          loadCityLayout: function() {
+          	try {
+	          	var layouts = this.loadCityLayouts();
+	          	var lid = this.layoutsList.getSelection()[0].getModel();
+	          	if (layouts && typeof layouts[lid] != 'undefined') {
+		          	// Load the selected city layout
+		          	var saved_units = layouts[lid].layout;
+		          	this.restoreFormation(saved_units);
+	          	}
+          	}
+          	catch (e) {
+          		console.log(e);
+          	}
+          },
+          saveCityLayout: function() {
+          	try {
+	          	// Save the current layout for this city
+	          	var current_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id();
+	          	var layouts = this.loadLayouts();
+	          	this.saveFormation();
+	          	var lid = new Date().getTime().toString();
+	          	var title = this.layoutsLabelText.getValue();
+	          	title += " (TS: " + this.lastPercentage.toFixed(2).toString() + ")";
+	          	var city_layouts = this.loadCityLayouts();
+	          	if (!layouts.hasOwnProperty(current_city)) {
+	          		layouts[current_city] = city_layouts;
+	          	}
+	          	console.log(layouts);
+	          	layouts[current_city][lid] = {
+	          		id: lid,
+	          		label: title,
+	          		layout: this.saved_units,
+	          	};
+	          	this.saveLayouts(layouts);
+	          	this.updateLayoutsList();
+	          	this.layoutsLabelText.setValue("");
+          	}
+          	catch (e) {
+          		console.log(e);
+          	}
+          },
+          loadLayouts: function() {
+          	var temp = localStorage.tasim_city_layouts;
+          	if (temp) {
+          		return JSON.parse(temp);
+          	}
+          	return {};
+          },
+          loadCityLayouts: function() {
+          	var temp = localStorage.tasim_city_layouts;
+          	if (temp) {
+          		var layouts = JSON.parse(temp);
+          		var current_city = ClientLib.Data.MainData.GetInstance().get_Cities().get_CurrentCity().get_Id();
+          		
+          		if (layouts.hasOwnProperty(current_city)) {
+          			return layouts[current_city];
+          		}
+          	}
+          	return {};
+          },
+          saveLayouts: function(layouts) {
+          	localStorage.tasim_city_layouts = JSON.stringify(layouts);
           },
           getCityPreArmyUnits: function() {
 						var armyBar = qx.core.Init.getApplication().getUIItem(ClientLib.Data.Missions.PATH.BAR_ATTACKSETUP);
@@ -411,10 +564,8 @@
 					    	console.log(e);
 					    }
 					    
+					    this.updateLayoutsList();
 							this.updateProWindow();
-							this.battleResultsBox.moveTo(115, 150);
-						  this.battleResultsBox.setHeight(400);
-						  this.battleResultsBox.setWidth(200);
 							this.battleResultsBox.open();
 						}
 					},
@@ -444,9 +595,14 @@
 					  	console.log(e);
 					  }
 					},
-					optimizingDone: function(continuous) {
-						if (continuous == null) {
-							continuous = this.continuousCheckBox.getValue();
+					optimizingDone: function(cancelled) {
+						if (cancelled == null) {
+							var continuous = this.continuousCheckBox.getValue();
+							var play_sound = this.soundCheckBox.getValue();
+						}
+						else {
+							var play_sound = false;
+							var continuous = false;
 						}
 						if (continuous && this.found_improvement) {
 							this.optimizing = false;
@@ -458,7 +614,7 @@
 							this.battleResultsBox.setModal(false);
 							this.optimizing = false;
 							this.ajaxImage.setVisibility("none");
-							var play_sound = this.soundCheckBox.getValue();
+							
 							if (play_sound) {
 								this.doneSound.play();
 							}
@@ -665,13 +821,19 @@
 						
 						return false;
 					},
-					restoreFormation: function(units) {
-						for (var i = 0; (i < units.length); i++) {
-							var saved_unit = this.saved_units[i];
-							units[i].m_CoordX = saved_unit.x;
-							units[i].m_CoordY = saved_unit.y;
-							units[i].m_UnitId = saved_unit.id;
+					restoreFormation: function(saved_units) {
+						saved_units = saved_units || this.saved_units;
+						var units = this.getCityPreArmyUnits();
+						var units_list = units.m_ArmyUnits.l;
+						for (var i = 0; (i < units_list.length); i++) {
+							var saved_unit = saved_units[i];
+							units_list[i].m_CoordX = saved_unit.x;
+							units_list[i].m_CoordY = saved_unit.y;
+							units_list[i].m_UnitId = saved_unit.id;
 						}
+						
+						units.UpdateArmyLayout$0();
+						units.RefreshData$0();
 					},
 					saveFormation: function() {
 						this.saved_units = [];
@@ -777,10 +939,7 @@
 						this.lastRepairTime = Math.max(v_repair_time, a_repair_time, i_repair_time);
 					},
 					updateFormation: function() {
-						var units = this.getCityPreArmyUnits();
-						this.restoreFormation(units.m_ArmyUnits.l);
-						units.UpdateArmyLayout$0();
-						units.RefreshData$0();
+						this.restoreFormation();
 					},
           onViewChange: function(oldMode, newMode) {
           	try {
