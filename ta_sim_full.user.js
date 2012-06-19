@@ -961,13 +961,24 @@
 						  		// Building
 						  		eb_total_hp += i_entity.m_iHitpoints;
 						  		eb_end_hp += i_entity.m_iHitpointsCurrent;
-						  		
-									if (i_entity.m_MDCTypeId == 195) { 
-										this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100; 
-									} 
-									else if (i_entity.m_MDCTypeId == 177) { 
-										this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100; 
-									}; 
+						  		//112, CONSTRUCTION YARD
+						  		//151, CONSTRUCTION YARD
+						  		//177, CONSTRUCTION YARD
+						  		//158, DEFENSE FACILITY
+						  		//131, DEFENSE FACILITY
+						  		//195, DEFENSE FACILITY
+						  		switch(i_entity.m_MDCTypeId) {
+						  			case 112:
+						  			case 151:
+						  			case 177:
+						  				this.lastCYPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
+						  				break;
+						  			case 158:
+						  			case 131:
+						  			case 195:
+						  				this.lastDFPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
+						  				break;						  				
+						  		}
 						  	}
 						  	else {
 						  		// Unit
