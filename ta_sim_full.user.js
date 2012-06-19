@@ -411,7 +411,7 @@
 			      
 			      ////////////////// Info ////////////////////
 			      var infoPage = new qx.ui.tabview.Page("Info");
-			      infoPage.setLayout(new qx.ui.layout.VBox());
+			      infoPage.setLayout(new qx.ui.layout.VBox(5));
 			      tabView.add(infoPage);
 						
 						// The Help Vertical Box
@@ -542,6 +542,7 @@
           	return {};
           },
           saveLayouts: function(layouts) {
+          	// TODO - Remove cities that are no longer existing
           	localStorage.tasim_city_layouts = JSON.stringify(layouts);
           },
           calculateLoot: function() {
