@@ -541,7 +541,9 @@
           	return {};
           },
           saveLayouts: function(layouts) {
+          	// TODO - Add some kind of global layout support
           	// TODO - Remove cities that are no longer existing
+          	// TODO - There should be another key for the attacking city
           	localStorage.tasim_city_layouts = JSON.stringify(layouts);
           },
           calculateLoot: function() {
