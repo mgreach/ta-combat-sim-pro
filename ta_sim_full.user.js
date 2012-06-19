@@ -1321,27 +1321,23 @@
             }
           },
           startSimulation: function() {
-          	var app = qx.core.Init.getApplication();
-          	var player_cities = ClientLib.Data.MainData.GetInstance().get_Cities();
-          	var current_city = player_cities.get_CurrentCity();
-          	
-          	window.TASuite.main.getInstance().troopDamageLabel.setValue("<span style='color: black; font-weight: bold;'>Troop Strength: 100%</span>");
-            
-            try {
-            	app.getPlayArea().setView(webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
-            }
-            catch (e) {
-            	app.getPlayArea().setView(webfrontend.gui.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
-            }
-            var battleground = this.setupBattleground();
-            
-            // Add the event listeners
-            battleground.m_Simulation.add_DamageDone$0((new System.EventHandler).$ctor(this, this.onDamageDone));
-            battleground.m_Simulation.add_OnDestroyDefense$0((new System.EventHandler).$ctor(this,this.onDefenseDestroyed));
-            
-            // Set the scene again, just in case it didn't work the first time
-            try {
-            	app.getPlayArea().setView(webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
+          	try {
+	          	var app = qx.core.Init.getApplication();
+	          	var player_cities = ClientLib.Data.MainData.GetInstance().get_Cities();
+	          	var current_city = player_cities.get_CurrentCity();
+	          	
+	          	window.TASuite.main.getInstance().troopDamageLabel.setValue("<span style='color: black; font-weight: bold;'>Troop Strength: 100%</span>");
+	            
+	            
+	            app.getPlayArea().setView(webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
+	            var battleground = this.setupBattleground();
+	
+	            // Add the event listeners
+	            battleground.m_Simulation.add_DamageDone$0((new System.EventHandler).$ctor(this, this.onDamageDone));
+	            battleground.m_Simulation.add_OnDestroyDefense$0((new System.EventHandler).$ctor(this,this.onDefenseDestroyed));
+	            
+	            // Set the scene again, just in case it didn't work the first time
+	            app.getPlayArea().setView(webfrontend.gui.PlayArea.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
             }
             catch (e) {
             	app.getPlayArea().setView(webfrontend.gui.PlayArea.modes.EMode_CombatReplay, current_city.get_Id(), 0, 0);
