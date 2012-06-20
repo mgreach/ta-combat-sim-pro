@@ -322,7 +322,7 @@
               // The Victory Label
               var hBox2 = new qx.ui.container.Composite()
               hBox2.setLayout(new qx.ui.layout.HBox(5));
-              hBox2.add(new qx.ui.basic.Label("Victory: "));
+              hBox2.add(new qx.ui.basic.Label("Outcome: "));
               this.simVictoryLabel = new qx.ui.basic.Label("Yes");
               hBox2.add(this.simVictoryLabel);
               this.simVictoryLabel.setTextColor("green");
