@@ -81,11 +81,11 @@
 					simRepairTimeLabel: null,
 					simVictoryLabel: null,
 					simTimeLabel: null,		
-						lvlSupportLabel: null,
-						enemySupportLabel: null,			
-						lastInfantryRepairTime: null,
-						lastVehicleRepairTime: null,
-						lastAircraftRepairTime: null,
+					lvlSupportLabel: null,
+					enemySupportLabel: null,			
+					lastInfantryRepairTime: null,
+					lastVehicleRepairTime: null,
+					lastAircraftRepairTime: null,
 					doneSound: null,
 					found_improvement: null,
           initialize: function() {
@@ -1089,89 +1089,89 @@
 					  
 					  this.lastVictory = battleground.m_Simulation.m_bDestroyDefense;
 					},
-				setLabelColor: function (obj, val, dir) {
-					var colors = ['black', 'blue', 'green', 'red'];
-					var color = colors[0];
-					var v = val;
-					if (dir >= 0) v = 100.0 - v;
-					if (v > 99.99) color = colors[3];
-					else if (v > 50) color = colors[2];
-					else if (v > 0) color = colors[1];
-					obj.setTextColor(color);
-				},
-				updateLabel100: function (obj, val, dir) {
-					this.setLabelColor(obj, val, dir);
-					obj.setValue(val.toFixed(2).toString());
-				},
-				updateLabel100time: function (obj, val, dir, time) {							
-					var s = val.toFixed(2).toString() + " @ ";
-					s += this.formatSecondsAsTime(time, "h:mm:ss");	
-					this.setLabelColor(obj, val, dir);					
-					obj.setValue(s);
-				},
-				updateProWindow: function() {
-					this.calculateSimResults();
-					var colors = ['black', 'blue', 'green', 'red'];
-					var s = "";
-					var n = 0;
-					// VICTORY
-					if (this.lastCYPercentage == 0) {
-						s = "Total Victory";
-						n = 0;
-					} 
-					else if (this.lastEnemyBuildingsPercentage < 100) {
-						s = "Victory";
-						n = 1;
-					} 
-					else {
-						s = "Total Defeat";
-						n = 3;
-					}
-					this.simVictoryLabel.setValue(s);
-					this.simVictoryLabel.setTextColor(colors[n]);
-					// i'll clear it	
-					// ENEMY
-					// -BASE							
-					// this.updateLabel100(this.enemyBaseStrengthLabel, this.lastEnemyOverallPercentage, -1);// new names
-					this.updateLabel100(this.enemyTroopStrengthLabel, this.lastEnemyPercentage, -1);// current names
-					// -DEFENCES
-					// this.updateLabel100(this.enemyDefencesStrengthLabel, this.lastEnemyDefencesPercentage, -1);
-					this.updateLabel100(this.enemyUnitsStrengthLabel, this.lastEnemyUnitsPercentage, -1);
-					// -BUILDINGS
-					// this.updateLabel100(this.enemyBuildingsStrengthLabel, this.lastEnemyBuildingsPercentage, -1);
-					this.updateLabel100(this.enemyBuildingsStrengthLabel, this.lastEnemyBuildingsPercentage, -1);
-					// this.updateLabel100(this.CYTroopStrengthLabel, this.lastEnemyCYPercentage, -1);//enemyCYStrengthLabel
-					this.updateLabel100(this.CYTroopStrengthLabel, this.lastCYPercentage, -1);
-					// this.updateLabel100(this.DFTroopStrengthLabel, this.lastEnemyDFPercentage, -1);//enemyDFStrengthLabel
-					this.updateLabel100(this.DFTroopStrengthLabel, this.lastDFPercentage, -1);
-							// -SUPPORT There is no label yet
-							// this.updateLabel100(this.enemySupportLabel, this.lastSupportPercentage, -1);
-							// var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
-							// this.lvlSupportLabel.setValue('Suport lvl ' + SLabel + ': ');
-					// ATTACKER	
-					// RepairTime
-					// this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400, -1);//max is 4h
-					// this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
-					this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400.0, -1);//max is 4h
-					this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
-					// OVERALL
-					// this.updateLabel100(this.simTroopLabel, this.lastTroopStrengthPercentage, 1);
-					this.updateLabel100(this.simTroopDamageLabel, this.lastPercentage, 1);
-					// INF
-					// this.updateLabel100time(this.infantryTroopStrengthLabel, this.lastInfantryPercentage, 1, this.lastInfantryRepairTime);
-					this.updateLabel100time(this.infantryTroopStrengthLabel, this.lastInfantryPercentage, 1, this.lastInfantryRepairTime);
-					// VEH
-					// this.updateLabel100time(this.vehicleTroopStrengthLabel, this.lastVehiclePercentage, 1, this.lastVehicleRepairTime);
-					this.updateLabel100time(this.vehicleTroopStrengthLabel, this.lastVehiclePercentage, 1, this.lastVehicleRepairTime);
-					// AIR
-					// this.updateLabel100time(this.aircraftTroopStrengthLabel, this.lastAircraftPercentage, 1, this.lastAircraftRepairTime);
-					this.updateLabel100time(this.airTroopStrengthLabel, this.lastAirPercentage, 1, this.lastAircraftRepairTime);
-					// BATTLE TIME
-					// this.setLabelColor(this.simBattleTimeLabel, this.totalBattleTime / 120, -1);//max is 120s
-					// this.simBattleTimeLabel.setValue(this.totalBattleTime.toFixed(2).toString());
-					this.setLabelColor(this.simTimeLabel, this.totalSeconds / 120.0, -1);//max is 120s
-					this.simTimeLabel.setValue(this.totalSeconds.toFixed(2).toString());
-				},
+					setLabelColor: function (obj, val, dir) {
+						var colors = ['black', 'blue', 'green', 'red'];
+						var color = colors[0];
+						var v = val;
+						if (dir >= 0) v = 100.0 - v;
+						if (v > 99.99) color = colors[3];
+						else if (v > 50) color = colors[2];
+						else if (v > 0) color = colors[1];
+						obj.setTextColor(color);
+					},
+					updateLabel100: function (obj, val, dir) {
+						this.setLabelColor(obj, val, dir);
+						obj.setValue(val.toFixed(2).toString());
+					},
+					updateLabel100time: function (obj, val, dir, time) {							
+						var s = val.toFixed(2).toString() + " @ ";
+						s += this.formatSecondsAsTime(time, "h:mm:ss");	
+						this.setLabelColor(obj, val, dir);					
+						obj.setValue(s);
+					},
+					updateProWindow: function() {
+						this.calculateSimResults();
+						var colors = ['black', 'blue', 'green', 'red'];
+						var s = "";
+						var n = 0;
+						// VICTORY
+						if (this.lastCYPercentage == 0) {
+							s = "Total Victory";
+							n = 0;
+						} 
+						else if (this.lastEnemyBuildingsPercentage < 100) {
+							s = "Victory";
+							n = 1;
+						} 
+						else {
+							s = "Total Defeat";
+							n = 3;
+						}
+						this.simVictoryLabel.setValue(s);
+						this.simVictoryLabel.setTextColor(colors[n]);
+						// i'll clear it	
+						// ENEMY
+						// -BASE							
+						// this.updateLabel100(this.enemyBaseStrengthLabel, this.lastEnemyOverallPercentage, -1);// new names
+						this.updateLabel100(this.enemyTroopStrengthLabel, this.lastEnemyPercentage, -1);// current names
+						// -DEFENCES
+						// this.updateLabel100(this.enemyDefencesStrengthLabel, this.lastEnemyDefencesPercentage, -1);
+						this.updateLabel100(this.enemyUnitsStrengthLabel, this.lastEnemyUnitsPercentage, -1);
+						// -BUILDINGS
+						// this.updateLabel100(this.enemyBuildingsStrengthLabel, this.lastEnemyBuildingsPercentage, -1);
+						this.updateLabel100(this.enemyBuildingsStrengthLabel, this.lastEnemyBuildingsPercentage, -1);
+						// this.updateLabel100(this.CYTroopStrengthLabel, this.lastEnemyCYPercentage, -1);//enemyCYStrengthLabel
+						this.updateLabel100(this.CYTroopStrengthLabel, this.lastCYPercentage, -1);
+						// this.updateLabel100(this.DFTroopStrengthLabel, this.lastEnemyDFPercentage, -1);//enemyDFStrengthLabel
+						this.updateLabel100(this.DFTroopStrengthLabel, this.lastDFPercentage, -1);
+								// -SUPPORT There is no label yet
+								// this.updateLabel100(this.enemySupportLabel, this.lastSupportPercentage, -1);
+								// var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
+								// this.lvlSupportLabel.setValue('Suport lvl ' + SLabel + ': ');
+						// ATTACKER	
+						// RepairTime
+						// this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400, -1);//max is 4h
+						// this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
+						this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400.0, -1);//max is 4h
+						this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
+						// OVERALL
+						// this.updateLabel100(this.simTroopLabel, this.lastTroopStrengthPercentage, 1);
+						this.updateLabel100(this.simTroopDamageLabel, this.lastPercentage, 1);
+						// INF
+						// this.updateLabel100time(this.infantryTroopStrengthLabel, this.lastInfantryPercentage, 1, this.lastInfantryRepairTime);
+						this.updateLabel100time(this.infantryTroopStrengthLabel, this.lastInfantryPercentage, 1, this.lastInfantryRepairTime);
+						// VEH
+						// this.updateLabel100time(this.vehicleTroopStrengthLabel, this.lastVehiclePercentage, 1, this.lastVehicleRepairTime);
+						this.updateLabel100time(this.vehicleTroopStrengthLabel, this.lastVehiclePercentage, 1, this.lastVehicleRepairTime);
+						// AIR
+						// this.updateLabel100time(this.aircraftTroopStrengthLabel, this.lastAircraftPercentage, 1, this.lastAircraftRepairTime);
+						this.updateLabel100time(this.airTroopStrengthLabel, this.lastAirPercentage, 1, this.lastAircraftRepairTime);
+						// BATTLE TIME
+						// this.setLabelColor(this.simBattleTimeLabel, this.totalBattleTime / 120, -1);//max is 120s
+						// this.simBattleTimeLabel.setValue(this.totalBattleTime.toFixed(2).toString());
+						this.setLabelColor(this.simTimeLabel, this.totalSeconds / 120.0, -1);//max is 120s
+						this.simTimeLabel.setValue(this.totalSeconds.toFixed(2).toString());
+					},
 					formatNumberWithCommas: function(x) {
 					  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 					},
