@@ -80,8 +80,8 @@
             simRepairTimeLabel: null,
             simVictoryLabel: null,
             simTimeLabel: null,
-            lvlSupportLabel: null,
-            enemySupportLabel: null,
+            enemySupportLevelLabel: null,
+            enemySupportStrengthLabel: null,
             lastInfantryRepairTime: null,
             lastVehicleRepairTime: null,
             lastAircraftRepairTime: null,
@@ -256,7 +256,15 @@
               eHBox3.add(this.DFTroopStrengthLabel);
               this.DFTroopStrengthLabel.setTextColor("red");
               eVBox.add(eHBox3);
-
+              // The Support Horizontal Box
+              var hboxSupportContainer = new qx.ui.container.Composite();
+              hboxSupportContainer.setLayout(new qx.ui.layout.HBox(5));
+              this.enemySupportLevelLabel = new qx.ui.basic.Label("Suport lvl ");
+              hboxSupportContainer.add(this.enemySupportLevelLabel);
+              this.enemySupportStrengthLabel = new qx.ui.basic.Label("--: 100");
+              hboxSupportContainer.add(this.enemySupportStrengthLabel);
+              this.enemySupportStrengthLabel.setTextColor("red");
+              eVBox.add(hboxSupportContainer);
               // The Troops Vertical Box
               var tVBox = new qx.ui.container.Composite()
               tVBox.setLayout(new qx.ui.layout.VBox(5));
@@ -776,11 +784,11 @@
                     // Move the unit
                     // TODO - First, check if the unit is a different type or level
                     /*
-									var other_unit = units.GetUnitByCoord(new_x,new_y);
-									console.log(other_unit);
-									console.log(unit);
-									console.log(units);
-									*/
+                  var other_unit = units.GetUnitByCoord(new_x,new_y);
+                  console.log(other_unit);
+                  console.log(unit);
+                  console.log(units);
+                  */
                     unit.MoveBattleUnit(new_x, new_y);
                     if (ta.checkNewResults()) {
                       ta.updateFormation();
@@ -1003,11 +1011,11 @@
 
                     if (i_entity.m_MDCTypeId >= 200 && i_entity.m_MDCTypeId <= 205) {
                       /* 200, FALCON SUPPORT
-									201, ION CANNON SUPPORT
-									202, SKYSTRIKE SUPPORT
-									203, EYE OF KANE
-									204, FIST OF KANE
-									205, BLADE OF KANE	*/
+                  201, ION CANNON SUPPORT
+                  202, SKYSTRIKE SUPPORT
+                  203, EYE OF KANE
+                  204, FIST OF KANE
+                  205, BLADE OF KANE  */
                       this.SupportLevel = parseInt(i_entity.m_iLevel); //m_iLevel
                       this.lastSupportPercentage = (i_entity.m_iHitpointsCurrent / i_entity.m_iHitpoints) * 100;
                     } else {
@@ -1166,9 +1174,9 @@
               }
               this.simVictoryLabel.setValue(s);
               this.simVictoryLabel.setTextColor(colors[n]);
-              // i'll clear it	
+              // i'll clear it  
               // ENEMY
-              // -BASE							
+              // -BASE              
               // this.updateLabel100(this.enemyBaseStrengthLabel, this.lastEnemyOverallPercentage, -1);// new names
               this.updateLabel100(this.enemyTroopStrengthLabel, this.lastEnemyPercentage, -1); // current names
               // -DEFENCES
@@ -1181,11 +1189,11 @@
               this.updateLabel100(this.CYTroopStrengthLabel, this.lastCYPercentage, -1);
               // this.updateLabel100(this.DFTroopStrengthLabel, this.lastEnemyDFPercentage, -1);//enemyDFStrengthLabel
               this.updateLabel100(this.DFTroopStrengthLabel, this.lastDFPercentage, -1);
-              // -SUPPORT There is no label yet
-              // this.updateLabel100(this.enemySupportLabel, this.lastSupportPercentage, -1);
-              // var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
-              // this.lvlSupportLabel.setValue('Suport lvl ' + SLabel + ': ');
-              // ATTACKER	
+              // -SUPPORT
+              var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
+              this.enemySupportLevelLabel.setValue('Suport lvl ' + SLabel + ': ');
+              this.updateLabel100(this.enemySupportStrengthLabel, this.lastSupportPercentage, -1);
+              // ATTACKER 
               // RepairTime
               // this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400, -1);//max is 4h
               // this.simRepairTimeLabel.setValue(this.formatSecondsAsTime(this.lastRepairTime, "h:mm:ss"));
