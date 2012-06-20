@@ -81,8 +81,8 @@
 					simRepairTimeLabel: null,
 					simVictoryLabel: null,
 					simTimeLabel: null,		
-					lvlSupportLabel: null,
-					enemySupportLabel: null,			
+					enemySupportLevelLabel: null,
+					enemySupportStrengthLabel: null,				
 					lastInfantryRepairTime: null,
 					lastVehicleRepairTime: null,
 					lastAircraftRepairTime: null,
@@ -228,8 +228,16 @@
 					  this.DFTroopStrengthLabel = new qx.ui.basic.Label("100");
 						eHBox3.add(this.DFTroopStrengthLabel);
 						this.DFTroopStrengthLabel.setTextColor("red");
-						eVBox.add(eHBox3);
-						
+						eVBox.add(eHBox3);		
+						// The Support Horizontal Box
+						var hboxSupportContainer = new qx.ui.container.Composite();
+						hboxSupportContainer.setLayout(new qx.ui.layout.HBox(5));	
+						this.enemySupportLevelLabel = new qx.ui.basic.Label("Suport lvl ");
+						hboxSupportContainer.add(this.enemySupportLevelLabel);	
+						this.enemySupportStrengthLabel = new qx.ui.basic.Label("--: 100");
+						hboxSupportContainer.add(this.enemySupportStrengthLabel);
+						this.enemySupportStrengthLabel.setTextColor("red");	
+						eVBox.add(hboxSupportContainer);
 						// The Troops Vertical Box
 					  var tVBox = new qx.ui.container.Composite()
 					  tVBox.setLayout(new qx.ui.layout.VBox(5));
@@ -1144,10 +1152,10 @@
 						this.updateLabel100(this.CYTroopStrengthLabel, this.lastCYPercentage, -1);
 						// this.updateLabel100(this.DFTroopStrengthLabel, this.lastEnemyDFPercentage, -1);//enemyDFStrengthLabel
 						this.updateLabel100(this.DFTroopStrengthLabel, this.lastDFPercentage, -1);
-								// -SUPPORT There is no label yet
-								// this.updateLabel100(this.enemySupportLabel, this.lastSupportPercentage, -1);
-								// var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
-								// this.lvlSupportLabel.setValue('Suport lvl ' + SLabel + ': ');
+						// -SUPPORT
+						var SLabel = (this.SupportLevel > 0) ? this.SupportLevel.toString() : '--';
+						this.enemySupportLevelLabel.setValue('Suport lvl ' + SLabel + ': ');
+						this.updateLabel100(this.enemySupportStrengthLabel, this.lastSupportPercentage, -1);
 						// ATTACKER	
 						// RepairTime
 						// this.setLabelColor(this.simRepairTimeLabel, this.lastRepairTime / 14400, -1);//max is 4h
