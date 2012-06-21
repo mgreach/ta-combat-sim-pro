@@ -3,7 +3,7 @@
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
-// @version        1.3.0
+// @version        1.3.0.1
 // @author         WildKatana
 // @require        http://sizzlemctwizzle.com/updater.php?id=130344&days=1
 // ==/UserScript==
@@ -35,6 +35,12 @@
                 toolTipText: "Return to Combat Setup"
               });
               this.buttonReturnSetup.addListener("click", this.returnSetup, this);
+              
+              var replayBar = qx.core.Init.getApplication().getReportReplayOverlay();
+              replayBar.add(this.buttonReturnSetup, {
+                top: 10,
+                right: 80
+              });
 
               _this = this;
               setTimeout(function () {
