@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name           Tiberium Alliances Combat Simulator
+// @name           Tiberium Alliances Combat Simulator1
 // @description    Allows you to simulate combat before actually attacking.
 // @namespace      https://prodgame*.alliances.commandandconquer.com/*/index.aspx* 
 // @include        https://prodgame*.alliances.commandandconquer.com/*/index.aspx*
